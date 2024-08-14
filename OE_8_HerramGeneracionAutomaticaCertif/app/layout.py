@@ -165,7 +165,7 @@ def create_layout(app, data):
                                       'Extranjero', 'Entidad pública','Organismo internacional', 'Usuario interno o colaborador'], value='Física', id="ginteres-dp"),
                         html.Label("Otro, ¿cuál?", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Input(id="discapacidad-input", type="text", placeholder='Digite el grupo étnico'),
+                        dcc.Input(id="ginteres-input", type="text", placeholder='Digite el grupo étnico'),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '80px', 'font-size': 12}),                   
                 ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
 
@@ -418,9 +418,12 @@ def create_layout(app, data):
     
         ], style={'width': '100%', 'max-width': '1200px', 'margin': '0 auto'})
     
-    app.css.append_css({
-        'external_url': 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'
-    })
+    # app.css.append_css({
+    #     'external_url': 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'
+    # })
+    external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
+                            '/assets/styles.css'
+                            ]
 
     app.css.append_css({
         'external_url': '/assets/styles.css'

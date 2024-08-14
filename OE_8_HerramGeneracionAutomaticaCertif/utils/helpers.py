@@ -28,18 +28,24 @@ def obtener_sensor(selected_variable):
     return None
 
 def construir_rango_fechas(dias, meses, ano):
-    # Asegurarse de que los valores sean convertidos a enteros
-    dias = list(map(int, dias))
     meses_dict = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5, "junio": 6,
                   "julio": 7, "agosto": 8, "septiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12}
-    meses = list(map(lambda mes: meses_dict[mes], meses))
+    
+    # Si días es None o vacío, usar 1 por defecto
+    dias = list(map(int, dias)) if dias else [1, 1]
+
+    # Si meses es None o vacío, usar 1 por defecto
+    meses = list(map(lambda mes: meses_dict[mes], meses)) if meses else [1, 12]
+    
+    # Se verifica que el año esté presente
+    if not ano:
+        raise ValueError("El año es un campo obligatorio")
+
     ano = list(map(int, ano))
 
-    # Se establece la fecha como rango desde la inicial hasta la final
-    fecha_inicio = datetime(ano[0], meses[0], dias[0]
-                            ).strftime('%Y-%m-%d %H:%M:%S')
-    fecha_fin = datetime(ano[-1], meses[-1], dias[-1]
-                         ).strftime('%Y-%m-%d %H:%M:%S')
+    # Construir la fecha de inicio y fin según los valores disponibles
+    fecha_inicio = datetime(ano[0], meses[0], dias[0]).strftime('%Y-%m-%d %H:%M:%S')
+    fecha_fin = datetime(ano[-1], meses[-1], dias[-1]).strftime('%Y-%m-%d %H:%M:%S')
     return fecha_inicio, fecha_fin
 
 def construir_codestacion(estacion_seleccionada):

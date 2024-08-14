@@ -79,9 +79,9 @@ def reemplazar_datos(doc, nombres, apellidos, dias, meses, ano, selected_variabl
     datos = {
         "{{NOMBRES}}": nombres.upper(),
         "{{APELLIDOS}}": apellidos.upper(),
-        "{{DIAS}}": ", ".join(map(str, dias)),
-        "{{MESES}}": ", ".join(meses),
-        "{{AÑO}}": ", ".join(map(str, ano)),
+        "{{DIAS}}": ", ".join(map(str, dias)) if dias else "",  # Manejar caso donde dias es None
+        "{{MESES}}": ", ".join(meses) if meses else "",  # Manejar caso donde meses es None
+        "{{AÑO}}": ", ".join(map(str, ano)), #if ano else "",  # Manejar caso donde ano es None
         "{{VARIABLE}}": selected_variable,
         "{{ESTACION}}": estacion_seleccionada['nombre'],
         "{{LATITUD}}": str(estacion_seleccionada['latitud']),

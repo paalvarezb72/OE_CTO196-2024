@@ -6,6 +6,7 @@ from docs.replace_data import *
 from utils.helpers import set_und  # Asegúrate de que set_und esté correctamente definido en helpers.py
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+from docx.shared import Pt
 
 def create_certificate(template_path, output_path, data):
     doc = Document(template_path)
@@ -83,11 +84,57 @@ def select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, corre
 
 def insert_table_in_doc(doc, data_frame, selected_variable):
     table = doc.add_table(rows=data_frame.shape[0] + 1, cols=data_frame.shape[1])
-    table.style = 'Table Grid'
+    #try:
+    #    table.style = 'Table Grid'
+    #except (KeyError, ValueError):
+    #    try:
+    #        table.style = 'Light Grid'
+    #    except (KeyError, ValueError):
+            # Si no se encuentra un estilo adecuado, se deja la tabla sin estilo específico
+    #        pass
+
+    # Aplicar bordes manualmente
+    for row in table.rows:
+        for cell in row.cells:
+            tc = cell._element
+            tcPr = tc.get_or_add_tcPr()
+            tcBorders = OxmlElement('w:tcBorders')
+            for border_name in ['top', 'left', 'bottom', 'right']:
+                border = OxmlElement(f'w:{border_name}')
+                border.set(qn('w:val'), 'single')
+                border.set(qn('w:sz'), '4')
+                border.set(qn('w:space'), '0')
+                border.set(qn('w:color'), '000000')
+                tcBorders.append(border)
+            tcPr.append(tcBorders)
+
+            # Aplicar fuente Verdana y tamaño de 11 puntos
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.name = 'Verdana'
+                    run.font.size = Pt(11)
+
+    # Poner el encabezado de la tabla en negrita y aplicar fuente Verdana
     for i, column in enumerate(data_frame.columns):
-        table.cell(0, i).text = column
+        cell = table.cell(0, i)
+        cell.text = column
+        for run in cell.paragraphs[0].runs:
+            run.bold = True
+            run.font.name = 'Verdana'
+            run.font.size = Pt(11)
+
+    # Rellenar las celdas con los datos
+    for i, column in enumerate(data_frame.columns):
         for j, value in enumerate(data_frame[column]):
-            table.cell(j + 1, i).text = str(value)
+            cell = table.cell(j + 1, i)
+            cell.text = str(value)
+            for run in cell.paragraphs[0].runs:
+                run.font.name = 'Verdana'
+                run.font.size = Pt(11)
+    #for i, column in enumerate(data_frame.columns):
+    #    table.cell(0, i).text = column
+    #    for j, value in enumerate(data_frame[column]):
+    #        table.cell(j + 1, i).text = str(value)
 
     def move_table_after(table, paragraph):
         tbl, p = table._tbl, paragraph._p

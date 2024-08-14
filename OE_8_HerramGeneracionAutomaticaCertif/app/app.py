@@ -3,7 +3,10 @@ import dash
 from app.layout import create_layout
 from app.callbacks import register_callbacks
 
-app = dash.Dash(__name__)
+external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
+                        '/assets/styles.css'
+                            ]
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title = "Certificaciones estado tiempo y clima"
 
 def initialize_app(data):

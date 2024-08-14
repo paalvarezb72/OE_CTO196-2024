@@ -170,8 +170,16 @@ def register_callbacks(app,data):
     def generar_certificado(n_clicks, nombres, apellidos, correo, dias, meses, ano, selected_variable, estacion_nombre, sin_estacion, lat, lon):
         if n_clicks is not None:
             try:
-                if not nombres or not apellidos or not dias or not meses or not ano or not selected_variable or not estacion_nombre:
+                # Verificar que los campos obligatorios siempre estén llenos
+                if not (nombres and apellidos and selected_variable and estacion_nombre):
                     return html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
+                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
+
+                # Validar fechas según la periodicidad seleccionada
+                if (('anual' in selected_variable.lower() and not ano) or
+                    ('mensual' in selected_variable.lower() and not (meses and ano)) or
+                    ('diaria' in selected_variable.lower() and not (dias and meses and ano))):
+                    return html.Div("Por favor, seleccione las fechas correspondientes para obtener su certificación.",
                                     style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
 
                 descrip_solicit = construir_descripsolicit(selected_variable)
