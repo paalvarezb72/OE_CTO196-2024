@@ -1,0 +1,90 @@
+/* assets/styles.css */
+.banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 48px;
+    z-index: 1000;
+}
+
+.banner img {
+    width: 100%;
+    display: block;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Work Sans', sans-serif;
+}
+
+.banner a {
+    color: white; /* Color del texto del enlace */
+    text-decoration: none; /* Sin subrayado */
+    font-family: Arial, sans-serif; /* Fuente del enlace */
+    font-size: 14px; /* Tamaño de fuente */
+}
+
+.footer {
+    background-color: #f8f8f8;
+    padding: 20px 0;
+    color: #333;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0 10%;
+}
+
+.footer-left {
+    max-width: 70%;
+}
+
+.footer-left h3 {
+    margin-top: 0;
+}
+
+.footer-left p {
+    margin: 5px 0;
+}
+
+.footer-left a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.footer-left a:hover {
+    text-decoration: underline;
+}
+
+.footer-right img {
+    max-height: 100px;
+}
+
+.footer-bottom {
+    background-color: #0056b3;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 20px;
+}
+
+.footer-bottom a {
+    color: #fff;
+    margin: 0 10px;
+    text-decoration: none;
+}
+
+.footer-bottom a:hover {
+    text-decoration: underline;
+}
+
+.social-media a img {
+    width: 24px;
+    height: 24px;
+}
