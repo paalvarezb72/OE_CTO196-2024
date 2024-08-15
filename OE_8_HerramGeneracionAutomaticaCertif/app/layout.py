@@ -2,17 +2,43 @@
 from dash import html, dcc
 import plotly.express as px
 import pandas as pd
+import dash_leaflet as dl
+from arcgis.gis import GIS
+from arcgis.mapping import WebMap
+from arcgis.features import FeatureLayer
 #from data.data_reading import data_locLims
 #from app.app import app
 
+gis = GIS("https://visualizador.ideam.gov.co/portal", "GDRM_IDEAM", "Meteo2024.")
+
+# Obtén el WebMap de ArcGIS Online
+webmap_item = gis.content.get("8ac9fc5932e74b07b2c5b0d6be3eec8e")
+webmap = WebMap(webmap_item)
+
+# Se extraen las capas del WebMap
+layers = []
+for layer in webmap.layers:
+    layers.append(dl.TileLayer(url=layer.url))
+    print(layer.url)
+
 def create_layout(app, data):
-    fig = px.scatter_mapbox(data,
-                            lat="latitud",
-                            lon="longitud",
-                            hover_name="nombre",
-                            hover_data={"altitud": True},
-                            zoom=10,
-                            mapbox_style="open-street-map")
+    # Se crean marcadores a partir de los datos
+    markers = [
+        dl.Marker(position=[row['latitud'], row['longitud']], 
+                  children=[
+                      dl.Tooltip(row['nombre']),
+                      dl.Popup(f"Altitud: {row['altitud']}")
+                  ],
+                  id={"type": "marker", "index": i})  # Añadir un identificador único para cada marcador
+        for i, row in data.iterrows()
+    ]
+    # fig = px.scatter_mapbox(data,
+    #                         lat="latitud",
+    #                         lon="longitud",
+    #                         hover_name="nombre",
+    #                         hover_data={"altitud": True},
+    #                         zoom=10,
+    #                         mapbox_style="open-street-map")
     # Se define la estructura de la página web
     layout = html.Div([
         # Banner
@@ -312,11 +338,24 @@ def create_layout(app, data):
                                 style={'font-family': 'arial', 'flex': 1, 'padding': '0 10px', 'min-width': '150px'}),
                 ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
 
-                dcc.Graph(id="mapa-estaciones",
-                        figure=fig,
-                        config={"scrollZoom": True, "responsive": True},
-                        style={"height": "500px", 'font-family': 'arial'},
-                ),
+                # dcc.Graph(id="mapa-estaciones",
+                #         figure=fig,
+                #         config={"scrollZoom": True, "responsive": True},
+                #         style={"height": "500px", 'font-family': 'arial'},
+                # ),
+
+                html.Div([
+                    dl.Map(center=[4, -74], zoom=10, 
+                        children=[
+                            dl.TileLayer(),  # Capa base
+                            dl.LayerGroup(markers),  # Capas de marcadores
+                            dl.LayerGroup(id="click-layer")  # Capa para los clics
+                        ], 
+                        style={'width': '100%', 'height': '50vh'}, id="map"),
+                    html.Div(id="click-info")  # Div para mostrar la información del clic
+                ]),
+
+                html.Div(id="click-info"),  # Div para mostrar la información del clic
                 
                 html.Div([
                     html.P("Si ninguna estación es cercana o de similar altitud a su punto de interés,\
@@ -421,13 +460,10 @@ def create_layout(app, data):
     # app.css.append_css({
     #     'external_url': 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'
     # })
-    external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
-                            '/assets/styles.css'
-                            ]
 
-    app.css.append_css({
-        'external_url': '/assets/styles.css'
-    })
+    # app.css.append_css({
+    #     'external_url': '/assets/styles.css'
+    # })
 
     return layout
 

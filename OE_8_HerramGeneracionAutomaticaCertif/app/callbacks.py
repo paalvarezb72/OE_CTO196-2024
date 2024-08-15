@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output, State
 import json
 import geopy.distance
 import plotly.express as px
+import dash_leaflet as dl
 from docs.replace_data import reemplazar_datos_noEMC, reemplazar_datos_nan, reemplazar_datos_precip, reemplazar_datos
 from docs.generate_docs import create_certificate, create_certificate_no_station, select_plantilla, insert_table_in_doc
 from utils.helpers import * #(obtener_sensor, construir_rango_fechas, construir_codestacion, 
@@ -19,7 +20,7 @@ def register_callbacks(app,data):
     @app.callback(
         Output('distance-info', 'children'),
         Input('calculate-distance-btn', 'n_clicks'),
-        State('mapa-estaciones', 'clickData'),
+        State('map', 'clickData'), #State('mapa-estaciones', 'clickData'),
         State('lat-input', 'value'),
         State('lon-input', 'value')
     )
@@ -38,42 +39,56 @@ def register_callbacks(app,data):
             (estacion_lat, estacion_lon), (lat, lon)).km
         return html.Div(f"La distancia es: {distancia:.2f} km.", style={'font-family': 'arial', 'font-size': 15})
 
-
+    # Callback para manejar clics en los marcadores
     @app.callback(
-        [Output('mapa-estaciones', 'figure'),
-         Output('lat-input', 'value'),
-         Output('lon-input', 'value')],
-        [Input('reset-button', 'n_clicks'),
-         Input('mapa-estaciones', 'clickData')],
-        prevent_initial_call=True
+        Output("click-info", "children"),
+        Input("map", "clickData")
     )
-    def update_map(n_clicks, clickData):
-        ctx = dash.callback_context
-        triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    def display_click_info(click_lat_lng):
+        if click_lat_lng is None:
+            return "Haz clic en el mapa para obtener las coordenadas."
+        
+        print(click_lat_lng)
+        
+        lat, lng = click_lat_lng["latlng"]["lat"], click_lat_lng["latlng"]["lng"]
+        return f"Coordenadas del clic: Latitud {lat}, Longitud {lng}"
+    
 
-        if triggered_id == 'reset-button':
-            fig = px.scatter_mapbox(data,
-                                    lat="latitud",
-                                    lon="longitud",
-                                    hover_name="nombre",
-                                    zoom=10,
-                                    mapbox_style="open-street-map")
-            return fig, None, None  # Reset everything
+    # @app.callback(
+    #     [Output('mapa-estaciones', 'figure'),
+    #      Output('lat-input', 'value'),
+    #      Output('lon-input', 'value')],
+    #     [Input('reset-button', 'n_clicks'),
+    #      Input('mapa-estaciones', 'clickData')],
+    #     prevent_initial_call=True
+    # )
+    # def update_map(n_clicks, clickData):
+    #     ctx = dash.callback_context
+    #     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-        if clickData:
-            lat = clickData['points'][0]['lat']
-            lon = clickData['points'][0]['lon']
-            fig = px.scatter_mapbox(data,
-                                    lat="latitud",
-                                    lon="longitud",
-                                    hover_name="nombre",
-                                    zoom=10,
-                                    mapbox_style="open-street-map")
-            fig.add_scattermapbox(lat=[lat], lon=[lon], marker={
-                                  'size': 15, 'color': 'red'})
-            return fig, None, None  # Update map with the station marker
+    #     if triggered_id == 'reset-button':
+    #         fig = px.scatter_mapbox(data,
+    #                                 lat="latitud",
+    #                                 lon="longitud",
+    #                                 hover_name="nombre",
+    #                                 zoom=10,
+    #                                 mapbox_style="open-street-map")
+    #         return fig, None, None  # Reset everything
 
-        return dash.no_update
+    #     if clickData:
+    #         lat = clickData['points'][0]['lat']
+    #         lon = clickData['points'][0]['lon']
+    #         fig = px.scatter_mapbox(data,
+    #                                 lat="latitud",
+    #                                 lon="longitud",
+    #                                 hover_name="nombre",
+    #                                 zoom=10,
+    #                                 mapbox_style="open-street-map")
+    #         fig.add_scattermapbox(lat=[lat], lon=[lon], marker={
+    #                               'size': 15, 'color': 'red'})
+    #         return fig, None, None  # Update map with the station marker
+
+    #     return dash.no_update
 
     @app.callback(
         Output('hidden-div', 'children'),
