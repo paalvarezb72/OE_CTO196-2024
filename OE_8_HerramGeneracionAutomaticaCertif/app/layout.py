@@ -356,6 +356,28 @@ def create_layout(app, data):
                 ]),
 
                 html.Div(id="click-info"),  # Div para mostrar la información del clic
+
+                html.Div([
+                    dcc.Upload(
+                        id='upload-zip',
+                        children=html.Div([
+                            'Arrastra y suelta o ',
+                            html.A('Selecciona un archivo .zip')
+                        ]),
+                        style={
+                            'width': '100%',
+                            'height': '60px',
+                            'lineHeight': '60px',
+                            'borderWidth': '1px',
+                            'borderStyle': 'dashed',
+                            'borderRadius': '5px',
+                            'textAlign': 'center',
+                            'margin': '10px'
+                        },
+                        accept='.zip'
+                    ),
+                    html.Div(id='upload-status')
+                ]),
                 
                 html.Div([
                     html.P("Si ninguna estación es cercana o de similar altitud a su punto de interés,\

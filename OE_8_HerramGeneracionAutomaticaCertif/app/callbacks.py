@@ -5,6 +5,8 @@ import json
 import geopy.distance
 import plotly.express as px
 import dash_leaflet as dl
+import base64
+import os
 from docs.replace_data import reemplazar_datos_noEMC, reemplazar_datos_nan, reemplazar_datos_precip, reemplazar_datos
 from docs.generate_docs import create_certificate, create_certificate_no_station, select_plantilla, insert_table_in_doc
 from utils.helpers import * #(obtener_sensor, construir_rango_fechas, construir_codestacion, 
@@ -53,7 +55,26 @@ def register_callbacks(app,data):
         lat, lng = click_lat_lng["latlng"]["lat"], click_lat_lng["latlng"]["lng"]
         return f"Coordenadas del clic: Latitud {lat}, Longitud {lng}"
     
+    UPLOAD_DIRECTORY = 'C:/Users/user/Documents/IDEAM/2024/Obligaciones_especificas_ejecucion/OE_8_HerramGeneracionAutomaticaCertif/shp_users_uploaded'
+    @app.callback(
+        Output("upload-status", "children"),
+        Input("upload-zip", "contents"),
+        State("upload-zip", "filename"),
+        State("upload-zip", "last_modified"),
+    )
+    def upload_file(contents, filename, last_modified):
+        if contents is not None:
+            # Decodifica el contenido del archivo
+            content_type, content_string = contents.split(',')
+            decoded = base64.b64decode(content_string)
+            
+            # Guarda el archivo .zip en la ruta especificada
+            file_path = os.path.join(UPLOAD_DIRECTORY, filename)
+            with open(file_path, "wb") as f:
+                f.write(decoded)
 
+            return f'Archivo {filename} cargado y almacenado con éxito.'
+        return "No se cargó ningún archivo."
     # @app.callback(
     #     [Output('mapa-estaciones', 'figure'),
     #      Output('lat-input', 'value'),
