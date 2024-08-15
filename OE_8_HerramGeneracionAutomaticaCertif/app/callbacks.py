@@ -48,9 +48,8 @@ def register_callbacks(app,data):
     )
     def display_click_info(click_lat_lng):
         if click_lat_lng is None:
-            return "Haz clic en el mapa para obtener las coordenadas."
-        
-        print(click_lat_lng)
+            return "Haga click en el mapa para obtener las coordenadas de su punto de interés"
+        print(click_lat_lng) # Ver en consola las coordenadas seleccionadas
         
         lat, lng = click_lat_lng["latlng"]["lat"], click_lat_lng["latlng"]["lng"]
         return f"Coordenadas del clic: Latitud {lat}, Longitud {lng}"

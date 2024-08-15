@@ -345,6 +345,7 @@ def create_layout(app, data):
                 # ),
 
                 html.Div([
+                    html.Div(id="click-info"),  # Div para mostrar la información del clic
                     dl.Map(center=[4, -74], zoom=10, 
                         children=[
                             dl.TileLayer(),  # Capa base
@@ -352,7 +353,6 @@ def create_layout(app, data):
                             dl.LayerGroup(id="click-layer")  # Capa para los clics
                         ], 
                         style={'width': '100%', 'height': '50vh'}, id="map"),
-                    html.Div(id="click-info")  # Div para mostrar la información del clic
                 ]),
 
                 html.Div(id="click-info"),  # Div para mostrar la información del clic
