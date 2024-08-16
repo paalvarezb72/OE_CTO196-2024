@@ -18,28 +18,35 @@ from utils.validation import validate_inputs
 from docx import Document
 import traceback
 
+import sys
+import os
+# Añadir la ruta del módulo 'main_firma.py'
+ruta_modulo = r'C:/Users/user/Documents/IDEAM/2024/ESRI/herramienta_certificaciones_TyC/geoprocessing-service/app/dummies'
+sys.path.append(ruta_modulo)
+#from main_firma import main
+
 def register_callbacks(app,data):
-    @app.callback(
-        Output('distance-info', 'children'),
-        Input('calculate-distance-btn', 'n_clicks'),
-        State('map', 'clickData'), #State('mapa-estaciones', 'clickData'),
-        State('lat-input', 'value'),
-        State('lon-input', 'value')
-    )
-    def calculate_distance(n_clicks, clickData, lat, lon):
-        if n_clicks is None or clickData is None:
-            return html.Div("Seleccione una estación, luego, cuando vea el marcador rojo, introduzca las coordenadas \
-                de su punto de interés y oprima el botón 'Calcular distancia'.", style={'font-family': 'arial', 'font-size': 13})
+    # @app.callback(
+    #     Output('distance-info', 'children'),
+    #     Input('calculate-distance-btn', 'n_clicks'),
+    #     State('map', 'clickData'), #State('mapa-estaciones', 'clickData'),
+    #     State('lat-input', 'value'),
+    #     State('lon-input', 'value')
+    # )
+    # def calculate_distance(n_clicks, clickData, lat, lon):
+    #     if n_clicks is None or clickData is None:
+    #         return html.Div("Seleccione una estación, luego, cuando vea el marcador rojo, introduzca las coordenadas \
+    #             de su punto de interés y oprima el botón 'Calcular distancia'.", style={'font-family': 'arial', 'font-size': 13})
 
-        estacion_lat = clickData['points'][0]['lat']
-        estacion_lon = clickData['points'][0]['lon']
+    #     estacion_lat = clickData['points'][0]['lat']
+    #     estacion_lon = clickData['points'][0]['lon']
 
-        if lat is None or lon is None:
-            return html.Div("Por favor, introduzca las coordenadas del punto de interés.", style={'font-family': 'arial', 'font-size': 13})
+    #     if lat is None or lon is None:
+    #         return html.Div("Por favor, introduzca las coordenadas del punto de interés.", style={'font-family': 'arial', 'font-size': 13})
 
-        distancia = geopy.distance.distance(
-            (estacion_lat, estacion_lon), (lat, lon)).km
-        return html.Div(f"La distancia es: {distancia:.2f} km.", style={'font-family': 'arial', 'font-size': 15})
+    #     distancia = geopy.distance.distance(
+    #         (estacion_lat, estacion_lon), (lat, lon)).km
+    #     return html.Div(f"La distancia es: {distancia:.2f} km.", style={'font-family': 'arial', 'font-size': 15})
 
     # Callback para manejar clics en los marcadores
     @app.callback(
@@ -110,16 +117,16 @@ def register_callbacks(app,data):
 
     #     return dash.no_update
 
-    @app.callback(
-        Output('hidden-div', 'children'),
-        [Input('sin-estaciones', 'value'),
-         State('lat-input', 'value'),
-         State('lon-input', 'value')]
-    )
-    def handle_no_station(selection, lat, lon):
-        if selection == 'no_station':
-            return json.dumps({'lat': lat, 'lon': lon})
-        return dash.no_update
+    # @app.callback(
+    #     Output('hidden-div', 'children'),
+    #     [Input('sin-estaciones', 'value'),
+    #      State('lat-input', 'value'),
+    #      State('lon-input', 'value')]
+    # )
+    # def handle_no_station(selection, lat, lon):
+    #     if selection == 'no_station':
+    #         return json.dumps({'lat': lat, 'lon': lon})
+    #     return dash.no_update
 
     @app.callback(
         [Output('dias-dropdown', 'disabled'),
@@ -196,17 +203,18 @@ def register_callbacks(app,data):
          State("meses-dropdown", "value"),
          State("ano-dropdown", "value"),
          State("tiposerie-dropdown", "value"),
-         State("estacion-dropdown", "value"),
-         State("sin-estaciones", "value"),
-         State("lat-input", "value"),
-         State("lon-input", "value")]
+         State("estacion-dropdown", "value")#,
+         #State("sin-estaciones", "value"),
+         #State("lat-input", "value"),
+         #State("lon-input", "value")
+         ]
     )
 
-    def generar_certificado(n_clicks, nombres, apellidos, correo, dias, meses, ano, selected_variable, estacion_nombre, sin_estacion, lat, lon):
+    def generar_certificado(n_clicks, nombres, apellidos, correo, dias, meses, ano, selected_variable, estacion_nombre):#, sin_estacion, lat, lon):
         if n_clicks is not None:
             try:
                 # Verificar que los campos obligatorios siempre estén llenos
-                if not (nombres and apellidos and selected_variable and estacion_nombre):
+                if not (nombres and apellidos and selected_variable ):#and estacion_nombre):
                     return html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
                                     style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
 
@@ -218,15 +226,15 @@ def register_callbacks(app,data):
                                     style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
 
                 descrip_solicit = construir_descripsolicit(selected_variable)
-                if sin_estacion == 'no_station':
-                    if not lat or not lon:
-                        return html.Div("Por favor, diligencie los datos de ubicación (lat. y lon.) del punto de interés",
-                                        style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
-                    doc = create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, lat, lon)
-                    nombre_archivo_final = f"Modif_{plantillas_por_variable['Sin Estación']}"
-                    doc.save(nombre_archivo_final)
-                    return html.Div("Respuesta generada para punto de interés sin estaciones cercanas representativas.",
-                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13})
+                # if sin_estacion == 'no_station':
+                #     if not lat or not lon:
+                #         return html.Div("Por favor, diligencie los datos de ubicación (lat. y lon.) del punto de interés",
+                #                         style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
+                #     doc = create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, lat, lon)
+                #     nombre_archivo_final = f"Modif_{plantillas_por_variable['Sin Estación']}"
+                #     doc.save(nombre_archivo_final)
+                #     return html.Div("Respuesta generada para punto de interés sin estaciones cercanas representativas.",
+                #                     style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13})
                 
                 estacion_seleccionada = data[data['nombre'] == estacion_nombre].iloc[0]
                 inicio, fin = construir_rango_fechas(dias, meses, ano)
@@ -240,7 +248,7 @@ def register_callbacks(app,data):
                     stationdf['Valor'] = (stationdf['Valor'] * 3.6).round(1)
 
                 stationdf_fnl = aplicar_transformacion(stationdf, selected_variable)
-                modifdfprecip_ClasifLimSup(stationdf_fnl, data, selected_variable, codestacion)
+                modifdato_LimSup(stationdf_fnl, data, selected_variable, codestacion)
 
                 if selected_variable == "Precipitación total mensual":
                     stationdf_fnl = calculate_indices(stationdf_fnl, normales, codestacion)
@@ -248,7 +256,7 @@ def register_callbacks(app,data):
                 if selected_variable == "Velocidad del viento horaria":
                     stationdf_dv = fetch_station_data(cur, inicio, fin, 'DVAG_CON', codestacion)
                     stationdf_dv.rename(columns={'Valor': 'Dirección del viento (°)'}, inplace=True)
-                    stationdf_fnl = pd.merge(stationdf_fnl, stationdf_dv, on='Fecha')
+                    stationdf_fnl = pd.merge(stationdf_dv, stationdf_fnl, on='Fecha')
 
                 doc, nombre_plantilla = select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, correo, dias, meses, ano, estacion_seleccionada, descrip_solicit)
                 doc = insert_table_in_doc(doc, stationdf_fnl, selected_variable)
@@ -264,3 +272,87 @@ def register_callbacks(app,data):
                                  html.Pre(error_traceback,
                                           style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})])
         return html.Div("Haga clic en este botón para generar la certificación:", style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13})
+
+    # @app.callback(
+    #     Output("output-state", "children"),
+    #     Input("generar-button", "n_clicks"),
+    #     [State("nombres-input", "value"),
+    #      State("apellidos-input", "value"),
+    #      State("correo-input", "value"),
+    #      State("dias-dropdown", "value"),
+    #      State("meses-dropdown", "value"),
+    #      State("ano-dropdown", "value"),
+    #      State("tiposerie-dropdown", "value"),
+    #      #State("estacion-dropdown", "value"),
+    #      #State("sin-estaciones", "value"),
+    #      State("lat-input", "value"),
+    #      State("lon-input", "value")]
+    # )
+
+    # def generar_certificado(n_clicks, nombres, apellidos, correo, dias, meses, ano, selected_variable, lat, lon):#, estacion_nombre, sin_estacion, lat, lon):
+    #     if n_clicks is not None:
+    #         try:
+    #             # Verificar que los campos obligatorios siempre estén llenos
+    #             if not (nombres and apellidos and selected_variable): #and estacion_nombre):
+    #                 return html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
+    #                                 style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
+
+    #             # Validar fechas según la periodicidad seleccionada
+    #             if (('anual' in selected_variable.lower() and not ano) or
+    #                 ('mensual' in selected_variable.lower() and not (meses and ano)) or
+    #                 ('diaria' in selected_variable.lower() and not (dias and meses and ano))):
+    #                 return html.Div("Por favor, seleccione las fechas correspondientes para obtener su certificación.",
+    #                                 style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
+
+    #             descrip_solicit = construir_descripsolicit(selected_variable)
+                # Llamar a la función main() de main_firma.py
+            #     resultado = main()
+            #     if resultado["status"] == "NO_STATION":                
+            #         doc = create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, lat, lon)
+            #         nombre_archivo_final = f"Modif_{plantillas_por_variable['Sin Estación']}"
+            #         doc.save(nombre_archivo_final)
+            #         return html.Div("Respuesta generada para punto de interés sin estaciones cercanas representativas.",
+            #                         style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13})
+                
+            #     elif resultado["status"] == "OK":
+            #         cod_estacion = resultado["message"]
+            #         estacion_seleccionada = data[data['CODIGO'] == cod_estacion].iloc[0]
+            #         inicio, fin = construir_rango_fechas(dias, meses, ano)
+            #         sensor = obtener_sensor(selected_variable)
+            #         codestacion = construir_codestacion(estacion_seleccionada)
+
+            #         conn, cur = create_connection()
+            #         stationdf = fetch_station_data(cur, inicio, fin, sensor, codestacion)
+                    
+            #         if 'viento' in selected_variable:
+            #             stationdf['Valor'] = (stationdf['Valor'] * 3.6).round(1)
+
+            #         stationdf_fnl = aplicar_transformacion(stationdf, selected_variable)
+            #         modifdfprecip_ClasifLimSup(stationdf_fnl, data, selected_variable, codestacion)
+
+            #         if selected_variable == "Precipitación total mensual":
+            #             stationdf_fnl = calculate_indices(stationdf_fnl, normales, codestacion)
+
+            #         if selected_variable == "Velocidad del viento horaria":
+            #             stationdf_dv = fetch_station_data(cur, inicio, fin, 'DVAG_CON', codestacion)
+            #             stationdf_dv.rename(columns={'Valor': 'Dirección del viento (°)'}, inplace=True)
+            #             stationdf_fnl = pd.merge(stationdf_fnl, stationdf_dv, on='Fecha')
+
+            #         doc, nombre_plantilla = select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, correo, dias, meses, ano, estacion_seleccionada, descrip_solicit)
+            #         doc = insert_table_in_doc(doc, stationdf_fnl, selected_variable)
+
+            #         nombre_archivo_final = f"Modif_{nombre_plantilla}"
+            #         doc.save(nombre_archivo_final)
+
+            #     elif resultado["status"] == "ERROR":
+            #         return html.Div(resultado["message"],
+            #                         style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
+
+            #     return html.Div("Se generó la certificación.", style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkgreen', 'font-size': 13})
+        #     except Exception as e:
+        #         error_traceback = traceback.format_exc()
+        #         return html.Div([html.Div(f"Intente más tarde, se produjo un error al generar la certificación: {e}",
+        #                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+        #                          html.Pre(error_traceback,
+        #                                   style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})])
+        # return html.Div("Haga clic en este botón para generar la certificación:", style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13})

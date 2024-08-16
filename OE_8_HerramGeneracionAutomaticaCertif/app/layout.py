@@ -293,76 +293,20 @@ def create_layout(app, data):
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '300px'})
                 ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}), 
 
-                html.P("En el siguiente mapa, busque por favor su área de interés, \
-                    desplácese en este manteniendo oprimido el clic izquierdo del cursor \
-                    y observe el nombre de la estación meteorológica más cercana, tenga en \
-                    cuenta el nombre obtenido.",
+                # Espaciador
+                html.Div(style={'height': '20px', 'width': '100%'}),
+
+                html.P("A continuación, cargue en formato .zip la geometría tipo punto de su sitio\
+                        de interés o interactúe con el mapa para localizarlo. Recuerde incluir en la\
+                       carpeta comprimida todos los archivos que acompañan el .shp",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
-
-                html.P("Recuerde que una estación se considera cercana si se encuentra a una distancia\
-                    inferior a 10 km planos del punto de interés -si la variable de interés es velocidad\
-                        del viento, la distancia debe ser inferior a 3 km-, no obstante, considere que aún\
-                        dentro de ese radio, una diferencia elevada de altitudes de la estación con respecto\
-                        a su punto de interés, es decir, superior a los 200msnm, (entre otros factores) \
-                        puede significar que esta no sea representativa para su zona de estudio. \
-                        A continuación, puede calcular las distancias lineales siguiendo las instrucciones.",
-                    style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px', 'font-style': 'italic'}),
-
-                html.Div([
-
-                    html.P("Calcule la distancia de la estación cercana a su punto de interés",
-                        style={'font-size': 16, 'font-family': 'arial', 'margin-top': '20px', 'font-weight': 'bold'}),
-                    html.Div(id="distance-info",
-                            style={'height': '20px', 'width': '100%'}),
-
-                    # Espaciador
-                    html.Div(style={'height': '20px', 'width': '100%'}),
-
-                    html.Div([
-                        html.Label("Latitud del punto de interés:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Input(id="lat-input", type="number",
-                                placeholder="P. e.: -2.64"),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '200px'}),
-
-                    html.Div([
-                        html.Label("Longitud del punto de interés:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Input(id="lon-input", type="number",
-                                placeholder="P. e.: -74.86"),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '200px'}),
-
-                    html.Button("Calcular distancia", id="calculate-distance-btn",
-                                style={'font-family': 'arial', 'flex': 1, 'padding': '0 10px', 'min-width': '150px'}),
-                    html.Button('Reiniciar selección', id='reset-button', n_clicks=0,
-                                style={'font-family': 'arial', 'flex': 1, 'padding': '0 10px', 'min-width': '150px'}),
-                ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
-
-                # dcc.Graph(id="mapa-estaciones",
-                #         figure=fig,
-                #         config={"scrollZoom": True, "responsive": True},
-                #         style={"height": "500px", 'font-family': 'arial'},
-                # ),
-
-                html.Div([
-                    html.Div(id="click-info"),  # Div para mostrar la información del clic
-                    dl.Map(center=[4, -74], zoom=10, 
-                        children=[
-                            dl.TileLayer(),  # Capa base
-                            dl.LayerGroup(markers),  # Capas de marcadores
-                            dl.LayerGroup(id="click-layer")  # Capa para los clics
-                        ], 
-                        style={'width': '100%', 'height': '50vh'}, id="map"),
-                ]),
-
-                html.Div(id="click-info"),  # Div para mostrar la información del clic
 
                 html.Div([
                     dcc.Upload(
                         id='upload-zip',
                         children=html.Div([
-                            'Arrastra y suelta o ',
-                            html.A('Selecciona un archivo .zip')
+                            'Arrastre y suelte su archivo .zip o',
+                            html.A('selecciónelo desde su ordenador')
                         ]),
                         style={
                             'width': '100%',
@@ -378,22 +322,24 @@ def create_layout(app, data):
                     ),
                     html.Div(id='upload-status')
                 ]),
-                
+
                 html.Div([
-                    html.P("Si ninguna estación es cercana o de similar altitud a su punto de interés,\
-                        por favor seleccione el siguiente ítem (recuerde antes haber registrado\
-                        las coordenadas de este con la anterior herramienta)",
-                        style={'font-family': 'arial', 'font-size': 13}),#, 'margin-top': '20px', }),
-                    
-                    dcc.RadioItems(
-                        options=[{'label': 'Sin estaciones representativas', 'value': 'no_station'}],
-                        value=None,
-                        id='sin-estaciones',
-                        style={'font-family': 'arial', 'font-size': 13}
-                    ),
-                    html.Div(id='hidden-div', style={'display': 'none'})
-                    
-                ], style={'display': 'flex', 'justify-content':'space-between'}),#, 'flex-wrap': 'wrap'}),
+                    html.Div(id="click-info"),  # Div para mostrar la información del clic
+                    dl.Map(center=[4, -74], zoom=10, 
+                        children=[
+                            dl.TileLayer(),  # Capa base
+                            dl.LayerGroup(markers),  # Capas de marcadores
+                            dl.LayerGroup(id="click-layer")  # Capa para los clics
+                        ], 
+                        style={'width': '100%', 'height': '80vh'}, id="map"),
+                ]),
+
+                html.P("Ejecute el análisis de representatividad de estaciones meteorológicas\
+                        con respecto a su punto de interés haciendo click en este botón",
+                    style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
+
+                html.Button("Analizar estaciones representativas", style={
+                            'font-family': 'arial'}, id="represanalis-button"),
 
                 html.P("A partir del ejercicio anterior, seleccione la estación de su interés",
                     style={'font-family': 'arial', 'margin-top': '20px'}),
@@ -410,6 +356,12 @@ def create_layout(app, data):
                 html.Div(style={'height': '20px', 'width': '100%'}),
 
                 html.Div(id='output-state'),
+
+                # html.Div([
+                #     dcc.ConfirmDialog(
+                #         id='output-state',
+                #         message='Danger danger! Are you sure you want to continue?',
+                #     )]),
 
                 html.Div(style={'height': '10px', 'width': '100%'}),
 

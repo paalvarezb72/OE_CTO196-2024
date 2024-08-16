@@ -112,42 +112,79 @@ def aplicar_transformacion(df, sel_var):
 
     return stationdf_fnl
 
-def modifdfprecip_ClasifLimSup(df, data, selected_variable, codestacion):
-    # Definir los bins y las etiquetas para la clasificación
-    bins = [0, 0.1, 10, 20, 40, 60, float('inf')]
-    labels = ['Tiempo seco', 'Lluvia ligera', 'Lluvia ligera a moderada',
-              'Lluvia moderada a fuerte', 'Lluvia fuerte a torrencial', 'Lluvia Torrencial']
+def modifdato_LimSup(df, data, selected_variable, codestacion):
+    # Volver numérico 'codestacion
+    codestacion_n = re.sub("[^0-9]", "", codestacion)
+    try:
+        codestacion_n = int(codestacion_n)
+    except ValueError:
+        print("codestacion contiene caracteres no convertibles a int.")
+        return df
 
+    # Adaptacion límites según variable    
     if selected_variable == "Precipitación total diaria":
-        # Volver numérico 'codestacion
-        codestacion_n = re.sub("[^0-9]", "", codestacion)
-        try:
-            codestacion_n = int(codestacion_n)
-        except ValueError:
-            print("codestacion contiene caracteres no convertibles a int.")
         # Obtener el límite superior para la estación seleccionada
-        limite_superior = data.loc[data['CODIGO'] == codestacion_n, 'LimSup']#.values[0]
+        limite_superior = data.loc[data['CODIGO'] == codestacion_n, 'LimSup']
         if not limite_superior.empty:
             limite_superior = limite_superior.values[0]
         else:
             # Manejo del caso en que no se encuentre un limite_superior
             print(f"No se encontró un límite superior para el código de estación {codestacion}.")
             df['Valor'] = 'ND'
-            df['Clasificación'] = 'No aplica'
             return df
         
+        # Verificar si la columna 'Valor' existe
+        if 'Valor' not in df.columns:
+            raise KeyError("La columna 'Valor' no existe en el DataFrame.")
+
         # Evaluar cada fila para determinar si el valor excede el límite superior
         def evaluar_fila(row):
             if row['Valor'] > limite_superior:
-                return (np.nan, 'No aplica')  # Asignar NaN a 'Valor' y 'No aplica' a 'Clasificación'
+                return np.nan  # Asignar NaN para valores que exceden el límite superior
             else:
-                return (row['Valor'], pd.cut([row['Valor']], bins=bins, labels=labels, right=False)[0])
+                return row['Valor']
 
-        # Aplicar la función evaluar_fila y separar los resultados en dos columnas
-        df[['Valor', 'Clasificación']] = df.apply(evaluar_fila, axis=1, result_type='expand')
-        #df.apply(evaluar_fila, axis=1, result_type='expand')
+        # Aplicar la función evaluar_fila
+        df['Valor'] = df.apply(evaluar_fila, axis=1)
 
     return df
+
+# def modifdfprecip_ClasifLimSup(df, data, selected_variable, codestacion):
+#     # Definir los bins y las etiquetas para la clasificación
+#     bins = [0, 0.1, 10, 20, 40, 60, float('inf')]
+#     labels = ['Tiempo seco', 'Lluvia ligera', 'Lluvia ligera a moderada',
+#               'Lluvia moderada a fuerte', 'Lluvia fuerte a torrencial', 'Lluvia Torrencial']
+
+#     if selected_variable == "Precipitación total diaria":
+#         # Volver numérico 'codestacion
+#         codestacion_n = re.sub("[^0-9]", "", codestacion)
+#         try:
+#             codestacion_n = int(codestacion_n)
+#         except ValueError:
+#             print("codestacion contiene caracteres no convertibles a int.")
+#         # Obtener el límite superior para la estación seleccionada
+#         limite_superior = data.loc[data['CODIGO'] == codestacion_n, 'LimSup']#.values[0]
+#         if not limite_superior.empty:
+#             limite_superior = limite_superior.values[0]
+#         else:
+#             # Manejo del caso en que no se encuentre un limite_superior
+#             print(f"No se encontró un límite superior para el código de estación {codestacion}.")
+#             df['Valor'] = 'ND'
+#             df['Clasificación'] = 'No aplica'
+#             return df
+        
+#         # Evaluar cada fila para determinar si el valor excede el límite superior
+#         def evaluar_fila(row):
+#             if row['Valor'] > limite_superior:
+#                 return (np.nan, 'No aplica')  # Asignar NaN a 'Valor' y 'No aplica' a 'Clasificación'
+#             else:
+#                 return (row['Valor'], pd.cut([row['Valor']], bins=bins, labels=labels, right=False)[0])
+
+#         # Aplicar la función evaluar_fila y separar los resultados en dos columnas
+#         df[['Valor', 'Clasificación']] = df.apply(evaluar_fila, axis=1, result_type='expand')
+#         #df.apply(evaluar_fila, axis=1, result_type='expand')
+
+#     return df
 
 normales = data_normales()
 # Función para extraer el valor normal del mes correspondiente
