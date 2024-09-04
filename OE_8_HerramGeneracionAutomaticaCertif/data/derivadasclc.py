@@ -3,11 +3,15 @@ import pandas as pd
 import numpy as np
 
 # Precipitación total mensual
-def PTPM_TT_M(df, columna_fecha='Fecha', columna_valor='Valor', porc_min=0.7):    
+def PTPM_TT_M(df, columna_fecha='Fecha', columna_valor='Valor', porc_min=0.7):
+    df = df.reset_index()
     if not pd.api.types.is_datetime64_any_dtype(df[columna_fecha]):
         df[columna_fecha] = pd.to_datetime(df[columna_fecha])
+    print(df.dtypes)
     
     df.set_index(columna_fecha, inplace=True)
+    df.sort_index(inplace=True)
+    df = df.asfreq('D')
     
     # Resample y sumar valores
     ptpm_tt_m = df[columna_valor].resample('M').sum()
@@ -25,14 +29,14 @@ def PTPM_TT_M(df, columna_fecha='Fecha', columna_valor='Valor', porc_min=0.7):
     
     return ptpm_tt_m
 
-def PTPM_TT_A(df, columna_fecha='Fecha', columna_valor='Valor', porc_min=0.75):    
-    if not pd.api.types.is_datetime64_any_dtype(df[columna_fecha]):
-        df[columna_fecha] = pd.to_datetime(df[columna_fecha])
-    
-    df.set_index(columna_fecha, inplace=True)
-
-    # Obtener la suma mensual como antes
+def PTPM_TT_A(df, columna_fecha='Fecha', columna_valor='Valor', porc_min=0.75):      
+    # Obtener la suma mensual
     ptpm_tt_m = PTPM_TT_M(df, columna_fecha, columna_valor, porc_min)
+    if not pd.api.types.is_datetime64_any_dtype(ptpm_tt_m[columna_fecha]):
+        ptpm_tt_m[columna_fecha] = pd.to_datetime(ptpm_tt_m[columna_fecha])
+    ptpm_tt_m.set_index(columna_fecha, inplace=True)
+    ptpm_tt_m.sort_index(inplace=True)
+    ptpm_tt_m = ptpm_tt_m.asfreq('M')
 
     # Calcular la cantidad de meses válidos por año
     counts = ptpm_tt_m[columna_valor].notna().resample('Y').sum()
@@ -127,6 +131,8 @@ def VVAG_D(df, columna_fecha='Fecha', columna_valor='Valor', porc_min=0.7):
 
     # Establecer la columna 'Fecha' como índice
     df.set_index(columna_fecha, inplace=True)
+    df.sort_index(inplace=True)
+    df = df.asfreq('H')
     
     # Calcular el total de registros esperados por día (24 horas)
     total_esperado_por_dia = 24
@@ -182,6 +188,7 @@ def TSSM_MEDIA_D(df, columna_fecha='Fecha', columna_valor='Valor'):
         df[columna_fecha] = pd.to_datetime(df[columna_fecha])
         
     df.set_index('Fecha', inplace=True)
+    df.sort_index(inplace=True)
     
     tssm_media_d = df.resample('D').apply(procesar_dia).reset_index()
         
@@ -196,6 +203,8 @@ def T_VVDAG_MEDIA_M(df, columna_fecha='Fecha', columna_valor='Valor', porc_min=0
     
     # Establecer la columna 'Fecha' como índice
     df.set_index(columna_fecha, inplace=True)
+    df.sort_index(inplace=True)
+    df = df.asfreq('D')
     
     # Calcular el número de días por mes
     days_in_month = df.index.to_series().dt.days_in_month.resample('M').first()
@@ -226,6 +235,8 @@ def T_VVDAG_MEDIA_A(df, columna_fecha='Fecha', columna_valor='Valor', porc_min=0
     
     # Asegurarse de que el índice sea un DatetimeIndex
     t2m_med_m.set_index('Fecha', inplace=True)
+    t2m_med_m.sort_index(inplace=True)
+    t2m_med_m = t2m_med_m.asfreq('M')
     
     # Calcular la cantidad de meses válidos por año
     counts = t2m_med_m['Valor'].notna().resample('Y').sum()

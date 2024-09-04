@@ -80,120 +80,133 @@ def create_layout(app, data):
             # Ajusta los márgenes según necesites
             style={'margin-left': '5%', 'margin-right': '5%'},
             children=[
-                html.H1("Certificaciones del estado del tiempo y del clima - IDEAM", style={'font-family': 'arial', 'text-align': 'center'},
-                        title="Datos obtenidos de la red IDEAM "),
+                html.H1("Certificaciones del estado del tiempo y del clima", 
+                        style={'font-family': 'arial', 'text-align': 'center', 'font-weight': 'bold'},
+                        title="Datos obtenidos de la red de observación en superficie IDEAM "),
 
                 html.P("Respetado usuario, diligiencie todos los campos para obtener su certificación:",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                 html.Div([
+                    html.P("Datos personales:", style={'font-family': 'arial', 'text-align': 'center',
+                                                       'font-weight': 'bold', 
+                                                    'font-size': 13}),
                     html.Div([
                         html.Label("Tipo solicitante:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.RadioItems(['Persona natural', 'Persona jurídica'], value='Persona natural', id="tpersona-ri"),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '60px', 'font-size': 12}),
+                            'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
+                        dcc.RadioItems(['Persona natural', 'Persona jurídica'], value='Persona natural', id="tpersona-ri",
+                                        labelStyle={'display': 'inline-block', 'margin-right': '10px'}),
+                    ], style={'flex': 1, 'padding': '0 6px', 'font-size': 12}),
 
                     html.Div([
-                        html.Label("Tipo identificación:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Dropdown(['Cédula de ciudadanía', 'Tarjeta de identidad', 'Cédula de extranjería',
-                                  'Pasaporte', 'Permiso especial de permanencia - PEP',
-                                   'Permiso de protección temporal - PPT'], value='Cédula de ciudadanía', id="tdoc-ri"),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '100px', 'font-size': 12}),
-                                       
+                        html.Label("Tipo de documento:", style={
+                            'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
+                        dcc.Dropdown(['Cédula de ciudadanía', 'NIT', 'Tarjeta de identidad', 'Cédula de extranjería',
+                                    'Pasaporte', 'Permiso especial de permanencia - PEP',
+                                    'Permiso de protección temporal - PPT'], value='Cédula de ciudadanía', id="tdoc-dp"),
+                    ], style={'flex': '1', 'padding': '0 6px', 'font-size': 12}),
+                                                                
                     html.Div([
-                        html.Label("Número identificación:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Input(id="cc-input", type="number", placeholder='1234567890'),
+                        html.Label("Número de documento:", style={
+                            'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
+                        dcc.Input(id="ndoc-input", type="number", placeholder='1234567890', maxLength=10),
+                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),               
+                ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
+                #html.Div([
+                    
+                html.Div([
+                    html.Div([
+                        html.Label("Nombre(s) o razón social:", style={
+                            'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
+                        dcc.Input(id="nombres-input", type="text", placeholder='Digite su(s) nombre(s)'),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
-                                                       
-                    html.Div([
-                        html.Label("Nombre(s):", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Input(id="nombres-input", type="text", placeholder='Nombres'),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '150px'}),
 
                     html.Div([
                         html.Label("Apellido(s):", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Input(id="apellidos-input", type="text", placeholder='Apellidos'),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '150px'}),
-                ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
-
-                # Espaciador
-                html.Div(style={'height': '10px', 'width': '100%'}),
-                # Contenedor resto de información personal
-                html.Div([
-                    html.Div([
-                        html.Label("Correo:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Input(id="correo-input", type="email", placeholder='Correo electrónico'),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '150px'}),
-
-                    html.Div([
-                        html.Label("Teléfono de contacto:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Input(id="tel-input", type="number", placeholder='3124567890'),
+                            'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
+                        dcc.Input(id="apellidos-input", type="text", placeholder='Digite su(s) apellido(s)'),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
 
                     html.Div([
                         html.Label("Género:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Dropdown(['Femenino', 'Masculino', 'No deseo registrar esta información',
-                                  'No aplica'], value='Femenino', id="genero-dp"),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '80px', 'font-size': 12}),
-                    
-                    html.Div([
-                        html.Label("Otro género, ¿cuál?", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                            'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
+                        dcc.Dropdown(['Femenino', 'Masculino', 'No deseo registrar esta información', 'Otro'], 
+                                    value='Femenino', id="genero-dp"),
+                        html.Label("¿Cuál?", style={
+                            'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Input(id="genero-input", type="text", placeholder='Digite el género'),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '100px', 'font-size': 12}),
-
+                    ], style={'flex': '1', 'padding': '0 6px', 'width': '180px', 'font-size': 12}),
                 ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
-                
-                # Espaciador
+                                # Espaciador
                 html.Div(style={'height': '10px', 'width': '100%'}),
                 # Contenedor resto de información personal
                 html.Div([
                     html.Div([
                         html.Label("Grupo étnico:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(['Indígena', 'Gitano (rom)', 'Negro, mulato, afrodescendiente, afrocolombiano, raizal o Palenquero',
-                                  'No aplica'], value='Femenino', id="grupetn-dp"),
-                        html.Label("Otro, ¿cuál?", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                                  'Otro','Ninguno'], value='Indígena', id="grupetn-dp"),
+                        html.Label("¿Cuál?", style={
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Input(id="grupetn-input", type="text", placeholder='Digite el grupo étnico'),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '80px', 'font-size': 12}),
                     
                     html.Div([
                         html.Label("Información poblacional:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(['Niños, Niñas y Adolescentes', 'Adulto Mayor', 'Mujer cabeza de familia',
                                       'Personas en condición de discapacidad', 'Población LGBTIQ+',
                                       'Personas desplazadas por la violencia y aquellas que se encuentran en pobreza extrema',
-                                      'No aplica'], value='Niños, Niñas y Adolescentes', id="infpoblac-dp"),
+                                      'Ninguno'], value='Niños, Niñas y Adolescentes', id="infpoblac-dp"),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '80px', 'font-size': 12}),
 
                     html.Div([
                         html.Label("¿Presenta discapacidad?", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(['Física', 'Auditiva', 'Visual','Sordoceguera', 'Intelectual – Cognitiva',
-                                      'Psicosocial', 'Talla baja','No aplica'], value='Física', id="discapacidad-dp"),
-                        html.Label("Otro, ¿cuál?", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Input(id="discapacidad-input", type="text", placeholder='Digite el grupo étnico'),
+                                      'Psicosocial', 'Talla baja','Otra','Ninguna'], value='Física', id="discap-dp"),
+                        html.Label("¿Cuál?", style={
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
+                        dcc.Input(id="discap-input", type="text", placeholder='Digite el grupo étnico'),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '80px', 'font-size': 12}),
 
                     html.Div([
                         html.Label("Grupo de interés:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(['Ciudadano', 'Empresa privada', 'Academia','Ente de control', 'Medio de comunicación',
-                                      'Extranjero', 'Entidad pública','Organismo internacional', 'Usuario interno o colaborador'], value='Física', id="ginteres-dp"),
-                        html.Label("Otro, ¿cuál?", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                                      'Extranjero', 'Entidad pública','Organismo internacional', 'Usuario interno o colaborador',
+                                      'Otro'], 
+                                      value='Ciudadano', id="ginteres-dp"),
+                        html.Label("¿Cuál?", style={
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Input(id="ginteres-input", type="text", placeholder='Digite el grupo étnico'),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '80px', 'font-size': 12}),                   
+                ], style={'display': 'flex', 'justify-content': 'flex-start', 'flex-wrap': 'wrap'}),
+
+                # Espaciador
+                html.Div(style={'height': '10px', 'width': '100%'}),
+                html.Div([
+                    html.P("Datos de contacto:",
+                            style={'font-family': 'arial', 'text-align': 'justify', 'font-weight': 'bold',
+                                   'font-size': 13}),
+                    html.Div([
+                        html.Label("Correo:", style={
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
+                        dcc.Input(id="correo-input", type="email", placeholder='Correo electrónico'),
+                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
+
+                    html.Div([
+                        html.Label("Teléfono de contacto:", style={
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
+                        dcc.Input(id="tel-input", type="number", placeholder='3124567890'),
+                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
                 ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
+                
+                # Contenedor datos de contacto
+                #html.Div([
+                    
+                # Espaciador
+                html.Div(style={'height': '10px', 'width': '100%'}),
 
                 # Texto intermedio
                 html.Div(
@@ -208,9 +221,9 @@ def create_layout(app, data):
                 html.Div([
                     html.Div([
                         html.Label("Variable meteorológica:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(
-                            id="variable-dropdown",
+                            id="variable-dp",
                             options=[
                                 {"label": "Precipitación", "value": "Precipitación"},
                                 {"label": "Temperatura máxima",
@@ -226,8 +239,8 @@ def create_layout(app, data):
 
                     html.Div([
                         html.Label("Variable y periodo:", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
-                        dcc.Dropdown(id="tiposerie-dropdown",
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
+                        dcc.Dropdown(id="tiposerie-dp",
                                     style={'font-family': 'arial'})
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '300px'}),
 
@@ -243,7 +256,7 @@ def create_layout(app, data):
                 html.Div([
                     html.Div([
                         html.Label("Día(s):", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(
                             id="dias-dropdown",
                             options=[{"label": str(i), "value": i}
@@ -256,7 +269,7 @@ def create_layout(app, data):
 
                     html.Div([
                         html.Label("Mes(es):", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(
                             id="meses-dropdown",
                             options=[
@@ -281,7 +294,7 @@ def create_layout(app, data):
 
                     html.Div([
                         html.Label("Año(s):", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 15}),
+                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(
                             id="ano-dropdown",
                             options=[{"label": str(i), "value": i}
@@ -303,7 +316,7 @@ def create_layout(app, data):
 
                 html.Div([
                     dcc.Upload(
-                        id='upload-zip',
+                        id='upload-data',
                         children=html.Div([
                             'Arrastre y suelte su archivo .zip o',
                             html.A('selecciónelo desde su ordenador')
@@ -320,8 +333,14 @@ def create_layout(app, data):
                         },
                         accept='.zip'
                     ),
-                    html.Div(id='upload-status')
+                    html.Div(id='upload-status'),
+                    dcc.Store(id='file-storage', storage_type='session'), 
                 ]),
+
+                
+                
+                html.P("Las coordenadas del click son:",
+                    style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                 html.Div([
                     html.Div(id="click-info"),  # Div para mostrar la información del clic
@@ -338,6 +357,7 @@ def create_layout(app, data):
                         con respecto a su punto de interés haciendo click en este botón",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
+                html.Div(id="output-represanalis"),
                 html.Button("Analizar estaciones representativas", style={
                             'font-family': 'arial'}, id="represanalis-button"),
 
@@ -379,7 +399,7 @@ def create_layout(app, data):
                 html.P(["Si requiere una certificación con información adicional -fenómenos, anomalías,\
                         análisis climatológicos, entre otros-, por favor tramite su solicitud al correo electrónico ",
                         html.A("contacto@ideam.gov.co", href="mailto:contacto@ideam.gov.co")," o a través del siguiente enlace: ",
-                        dcc.Link("Formulario web", href="http://sgdorfeo.ideam.gov.co/orfeo6.1/formularioWeb/", target="_blank"),"."
+                        dcc.Link("Formulario web", href="http://sgdorfeo.ideam.gov.co/orfeo-6.1/formularioWeb/", target="_blank"),"."
                 ], style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                 # Espaciador
