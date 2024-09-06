@@ -68,8 +68,6 @@ def create_layout(app, data):
         html.Div([
             html.Img(src=app.get_asset_url('Logo_IDEAM_Color2.png'), style={
                     'display': 'inline-block', 'width': 'auto'}),
-            html.Img(src=app.get_asset_url('LOGO_AMBIENTE_2024_2.png'), style={
-                    'display': 'inline-block', 'width': '10%'}),
         ], style={'margin-left': '5%', 'margin-right': '5%','width': '100%', 'display': 'flex',
                   'justify-content': 'space-between', 'align-items': 'center'}),
 
@@ -80,17 +78,23 @@ def create_layout(app, data):
             # Ajusta los márgenes según necesites
             style={'margin-left': '5%', 'margin-right': '5%'},
             children=[
-                html.H1("Certificaciones del estado del tiempo y del clima", 
-                        style={'font-family': 'arial', 'text-align': 'center', 'font-weight': 'bold'},
+                html.H1("Certificaciones del estado del tiempo y clima", 
+                        style={'font-family': 'arial', 'text-align': 'center'}, #, 'font-weight': 'bold'
                         title="Datos obtenidos de la red de observación en superficie IDEAM "),
-
-                html.P("Respetado usuario, diligiencie todos los campos para obtener su certificación:",
-                    style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
-
+                # Espaciador
+                html.Div(style={'height': '10px', 'width': '100%'}),
+                html.P(["Respetado usuario, diligiencie todos los campos para obtener su certificación. Tenga\
+                       en cuenta la ",
+                       dcc.Link("política de tratamiento y protección de datos personales.",
+                                href="https://www.ideam.gov.co/sites/default/files/archivos/politica_de_tratamiento_y_proteccion_de_datos_personales_0.pdf",
+                                target="_blank")],
+                       style={'text-align': 'justify', 'margin-bottom': '20px'}), #'font-family': 'arial', 
                 html.Div([
                     html.P("Datos personales:", style={'font-family': 'arial', 'text-align': 'center',
                                                        'font-weight': 'bold', 
                                                     'font-size': 13}),
+                ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
+                html.Div([
                     html.Div([
                         html.Label("Tipo solicitante:", style={
                             'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
@@ -104,29 +108,29 @@ def create_layout(app, data):
                         dcc.Dropdown(['Cédula de ciudadanía', 'NIT', 'Tarjeta de identidad', 'Cédula de extranjería',
                                     'Pasaporte', 'Permiso especial de permanencia - PEP',
                                     'Permiso de protección temporal - PPT'], value='Cédula de ciudadanía', id="tdoc-dp"),
-                    ], style={'flex': '1', 'padding': '0 6px', 'font-size': 12}),
-                                                                
+                    ], style={'flex': '1', 'padding': '0 6px', 'font-size': 12}),                                               
                     html.Div([
                         html.Label("Número de documento:", style={
                             'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
-                        dcc.Input(id="ndoc-input", type="number", placeholder='1234567890', maxLength=10),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),               
+                        dcc.Input(id="ndoc-input", type="number", placeholder='1234567890', maxLength=10,
+                                  style={'width': '100%'}),
+                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
+                    html.Div([
+                        html.Label("Nombre(s) o razón social:", style={
+                            'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
+                        dcc.Input(id="nombres-input", type="text", placeholder='Digite su(s) nombre(s)',
+                                  style={'width': '100%'}),
+                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '180px'}),            
                 ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
                 #html.Div([
                     
                 html.Div([
                     html.Div([
-                        html.Label("Nombre(s) o razón social:", style={
-                            'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
-                        dcc.Input(id="nombres-input", type="text", placeholder='Digite su(s) nombre(s)'),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
-
-                    html.Div([
                         html.Label("Apellido(s):", style={
                             'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
-                        dcc.Input(id="apellidos-input", type="text", placeholder='Digite su(s) apellido(s)'),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
-
+                        dcc.Input(id="apellidos-input", type="text", placeholder='Digite su(s) apellido(s)',
+                                  style={'width': '100%'}), #, 'min-width': '80px'
+                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '180px'}), 
                     html.Div([
                         html.Label("Género:", style={
                             'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
@@ -136,11 +140,6 @@ def create_layout(app, data):
                             'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Input(id="genero-input", type="text", placeholder='Digite el género'),
                     ], style={'flex': '1', 'padding': '0 6px', 'width': '180px', 'font-size': 12}),
-                ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
-                                # Espaciador
-                html.Div(style={'height': '10px', 'width': '100%'}),
-                # Contenedor resto de información personal
-                html.Div([
                     html.Div([
                         html.Label("Grupo étnico:", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
@@ -150,7 +149,11 @@ def create_layout(app, data):
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Input(id="grupetn-input", type="text", placeholder='Digite el grupo étnico'),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '80px', 'font-size': 12}),
-                    
+                ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
+                                # Espaciador
+                html.Div(style={'height': '10px', 'width': '100%'}),
+                # Contenedor resto de información personal
+                html.Div([                   
                     html.Div([
                         html.Label("Información poblacional:", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
@@ -185,29 +188,31 @@ def create_layout(app, data):
 
                 # Espaciador
                 html.Div(style={'height': '10px', 'width': '100%'}),
-                html.Div([
+                html.Div(
                     html.P("Datos de contacto:",
                             style={'font-family': 'arial', 'text-align': 'justify', 'font-weight': 'bold',
                                    'font-size': 13}),
+                ),
+                html.Div([
                     html.Div([
                         html.Label("Correo:", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
-                        dcc.Input(id="correo-input", type="email", placeholder='Correo electrónico'),
+                        dcc.Input(id="correo-input", type="email", placeholder='ejemplo@dominio.com',
+                                  style={'width': '100%'}),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
 
                     html.Div([
                         html.Label("Teléfono de contacto:", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
-                        dcc.Input(id="tel-input", type="number", placeholder='3124567890'),
+                        dcc.Input(id="tel-input", type="number", placeholder='3124567890',style={'width': '100%'}),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
-                ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
-                
-                # Contenedor datos de contacto
-                #html.Div([
-                    
+                    # Div sección columna 3 datos contacto
+                    html.Div([
+                        # Espacio en blanco
+                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
+                ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),                  
                 # Espaciador
-                html.Div(style={'height': '10px', 'width': '100%'}),
-
+                html.Div(style={'height': '20px', 'width': '100%'}),
                 # Texto intermedio
                 html.Div(
                     html.P("Por favor, elija la variable meteorológica y su periodicidad de interés:",
@@ -337,8 +342,6 @@ def create_layout(app, data):
                     dcc.Store(id='file-storage', storage_type='session'), 
                 ]),
 
-                
-                
                 html.P("Las coordenadas del click son:",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
@@ -347,7 +350,10 @@ def create_layout(app, data):
                     dl.Map(center=[4, -74], zoom=10, 
                         children=[
                             dl.TileLayer(),  # Capa base
-                            dl.LayerGroup(markers),  # Capas de marcadores
+                            #dl.LayerGroup(markers),
+                            dl.LayerGroup([
+                            dl.CircleMarker(center=[row['latitud'], row['longitud']], 
+                                            radius=2, color='blue', fill=True) for i, row in data.iterrows()]),
                             dl.LayerGroup(id="click-layer")  # Capa para los clics
                         ], 
                         style={'width': '100%', 'height': '80vh'}, id="map"),
@@ -410,7 +416,7 @@ def create_layout(app, data):
         html.Footer([
             html.Div([
                 html.Div([
-                    html.H3("Instituto de Hidrología, Meteorología y Estudios Ambientales"),
+                    html.H4("Instituto de Hidrología, Meteorología y Estudios Ambientales"),
                     html.P("Sede principal"),
                     html.P("Dirección ventanilla única de radicación: Calle 25 D No. 96 B - 70 Bogotá D.C."),
                     html.P("Código Postal: 110911"),
@@ -431,24 +437,38 @@ def create_layout(app, data):
                         html.A("contacto@ideam.gov.co", href="mailto:contacto@ideam.gov.co")
                     ]),
                     html.Div([
-                        html.A(html.Img(src="/assets/facebook-icon.png", alt="Facebook"), href="https://www.facebook.com/IDEAM.INSTITUTO"),
-                        html.A(html.Img(src="/assets/twitter-icon.png", alt="Twitter"), href="https://twitter.com/IDEAMCOLOMBIA"),
-                        html.A(html.Img(src="/assets/instagram-icon.png", alt="Instagram"), href="https://www.instagram.com/IDEAMCOLOMBIA"),
-                        html.A(html.Img(src="/assets/youtube-icon.png", alt="YouTube"), href="https://www.youtube.com/user/INSTITUTOIDEAM")
-                    ], style={'display': 'flex', 'gap': '10px', 'margin-top': '10px'})
+                        html.A(html.Img(src="/assets/logofb.png",alt="Facebook",style={'max-height': '30px'}), 
+                               href="https://www.facebook.com/ideam.instituto", target="_blank"),html.P('Facebook'),
+                        html.A(html.Img(src="/assets/logoIG.png", alt="Instagram",style={'max-height': '30px'}), 
+                               href="https://www.instagram.com/ideamcolombia/", target="_blank"),html.P('Instagram'),
+                        html.A(html.Img(src="/assets/logoX.png", alt="X",style={'max-height': '30px'}), 
+                               href="https://x.com/IDEAMColombia", target="_blank"),html.P('X'),
+                        html.A(html.Img(src="/assets/logoYT.png", alt="YouTube",style={'max-height': '30px'}), 
+                               href="https://www.youtube.com/user/InstitutoIDEAM", target="_blank"),html.P('YouTube'),
+                    ], style={'display': 'flex', 'gap': '10px', 'margin-top': '10px'}),
+                    # Espaciador
+                    html.Div(style={'height': '50px', 'width': '100%'}),
+                    html.Div([
+                        html.A("Políticas", href="https://www.ideam.gov.co/politica-de-tratamiento-de-datos", 
+                               target="_blank", style={'width': '100%'}),
+                        html.A("Mapa del sitio", href="https://www.ideam.gov.co/", target="_blank", style={'width': '100%'}),
+                        html.A("Términos y condiciones", href="https://www.ideam.gov.co/", target="_blank",
+                               style={'width': '100%'}),
+                        html.A("Accesibilidad", href="https://ideam.gov.co/accesibilidad", target="_blank",
+                               style={'width': '100%'}),
+                    ], style={'display': 'flex', 'justify-content': 'space-between', 'gap': '20px'}),
                 ], className='footer-left'),
                 html.Div([
-                    html.Img(src="/assets/logo-ambiente.png", alt="Ambiente", style={'max-height': '100px'})
+                    html.Img(src="/assets/LOGO_AMBIENTE_2024.png", alt="Ambiente", style={'height': '300px'}), 
                 ], className='footer-right')
             ], className='footer-container'),
-            html.Div([
-                html.A("Políticas", href="#"),
-                html.A("Mapa del sitio", href="#"),
-                html.A("Términos y condiciones", href="#"),
-                html.A("Accesibilidad", href="#")
-            ], className='footer-bottom')
-        ], className='footer')
-    
+        ], className='footer',style={'width': '100%', 'max-width': '1200px', 'margin': '0 auto'}),
+        # Banner afuera del contenedor
+        html.Div([
+            html.Img(src=app.get_asset_url('Banner_GovCo_Bottom.png'), style={
+                        'width': '100%', 'display': 'block', 'margin': '0', 'padding': '0'}),
+        ], className='footer-bottom', style={'width': '100%', 'position': 'relative', 'bottom': '0'}),
+
         ], style={'width': '100%', 'max-width': '1200px', 'margin': '0 auto'})
     
     # app.css.append_css({

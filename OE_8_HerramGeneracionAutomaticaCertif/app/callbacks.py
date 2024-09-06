@@ -389,7 +389,7 @@ def register_callbacks(app,data):
          State("ano-dropdown", "value"),
          State("variable-dp", "value"),
          State("tiposerie-dp", "value"),
-         State("upload-data", "contents"),
+         State("upload-data", "filename"),
          State("click-info", "children")]
          #State("estacion-dropdown", "value"),
          #State("sin-estaciones", "value"),
@@ -418,7 +418,7 @@ def register_callbacks(app,data):
                 data_request = {"variable_meteorologica": selected_var}
                 #data_request["variable_meteorologica"] = selected_variable
                 if upld:
-                    itemid_file = request_gp.upload_file(UPLOAD_DIRECTORY)
+                    itemid_file = request_gp.upload_file(os.path.join(UPLOAD_DIRECTORY, upld))
                     print(itemid_file)
                     data_request["area_interes_shape"] = itemid_file
                 elif clickinfo:
