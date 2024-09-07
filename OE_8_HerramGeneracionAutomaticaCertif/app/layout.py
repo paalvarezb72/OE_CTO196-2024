@@ -323,7 +323,7 @@ def create_layout(app, data):
                     dcc.Upload(
                         id='upload-data',
                         children=html.Div([
-                            'Arrastre y suelte su archivo .zip o',
+                            'Arrastre y suelte su archivo .zip o ',
                             html.A('selecciónelo desde su ordenador')
                         ]),
                         style={
@@ -388,11 +388,14 @@ def create_layout(app, data):
                 #         id='output-state',
                 #         message='Danger danger! Are you sure you want to continue?',
                 #     )]),
-
+                # Espaciador
                 html.Div(style={'height': '10px', 'width': '100%'}),
-
-                html.Button("Generar Certificación", style={
+                html.Div([
+                    html.Button("Generar Certificación", style={
                             'font-family': 'arial'}, id="generar-button"),
+                    html.Button("Descargar certificación", id="descargar-button"),
+                    dcc.Download(id="download-certif")
+                ]),
 
                 html.Div(style={'height': '10px', 'width': '100%'}),
 

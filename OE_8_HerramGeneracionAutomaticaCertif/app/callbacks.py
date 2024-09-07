@@ -1,16 +1,17 @@
 import dash
-from dash import html
-from dash.dependencies import Input, Output, State
-import json
-import geopy.distance
 import plotly.express as px
 import dash_leaflet as dl
 import base64
 import os
 import json
-import pypandoc
-import requests
+import traceback
+import sys
+import pythoncom
+import io
+import time
 #from docs.replace_data import reemplazar_datos_noEMC, reemplazar_datos_nan, reemplazar_datos_precip, reemplazar_datos
+from dash import html, dcc
+from dash.dependencies import Input, Output, State
 from docs.generate_docs import create_certificate, create_certificate_no_station, select_plantilla, insert_table_in_doc
 from utils.helpers import * #(obtener_sensor, construir_rango_fechas, construir_codestacion, 
                            #construir_descripsolicit, fetch_station_data, aplicar_transformacion, 
@@ -20,12 +21,7 @@ from utils.db_connection import create_connection
 from utils.validation import validate_inputs
 from docx import Document
 from docx2pdf import convert
-import pythoncom
 from utils.request_gp.RequestGp import RequestGp
-import traceback
-
-import sys
-import os
 # Añadir la ruta del módulo 'main_firma.py'
 ruta_modulo = r'C:/Users/user/Documents/IDEAM/2024/ESRI/herramienta_certificaciones_TyC/geoprocessing-service/app/dummies'
 sys.path.append(ruta_modulo)
@@ -300,9 +296,12 @@ def register_callbacks(app,data):
         "Sin Estación": "PlantillaOficioLamentoSinEstaciones.docx"
     }
 
+    # Variable global para almacenar el archivo PDF generado
     @app.callback(
-        Output("output-state", "children"),
-        Input("generar-button", "n_clicks"),
+        [Output("output-state", "children"),
+         Output("download-certif", "data")],
+        [Input("generar-button", "n_clicks"), 
+         Input("descargar-button", "n_clicks")],
         [State("nombres-input", "value"),
          State("apellidos-input", "value"),
          State("correo-input", "value"),
@@ -317,8 +316,9 @@ def register_callbacks(app,data):
          ]
     )
 
-    def generar_certificado(n_clicks, nombres, apellidos, correo, dias, meses, ano, selected_variable, estacion_nombre):#, sin_estacion, lat, lon):
-        if n_clicks is not None:
+    def generar_certificado(n_clicks, n_clicks2, nombres, apellidos, correo, dias, meses, ano, selected_variable, estacion_nombre):#, sin_estacion, lat, lon):
+        # Lógica de generación de certificado
+        if n_clicks is not None and n_clicks2 is None:
             try:
                 # Verificar que los campos obligatorios siempre estén llenos
                 if not (nombres and apellidos and selected_variable ):#and estacion_nombre):
@@ -370,30 +370,54 @@ def register_callbacks(app,data):
 
                 nombre_archivo_final = f"Modif_{nombre_plantilla}"
                 doc.save(nombre_archivo_final)
-                # Asegurarse de que el archivo se haya guardado completamente
-                import time
+                # Se espera 1 segundo para asegurarse de que el archivo se haya guardado completamente
                 time.sleep(1)
                 if os.path.exists(nombre_archivo_final):
                     # Inicializa COM
                     try: 
                         pythoncom.CoInitialize()
-                        convert(nombre_archivo_final, f'{nombre_archivo_final[:-5]}.pdf')
+                        pdf_path = f'{nombre_archivo_final[:-5]}.pdf'
+                        convert(nombre_archivo_final, pdf_path)
+                        # Guardar el archivo PDF en un buffer
+                        buffer = io.BytesIO()
+                        with open(pdf_path, 'rb') as f:
+                            buffer.write(f.read())
+                        buffer.seek(0)
+                        archivo_pdf_generado = buffer.read()
+
+                        return (html.Div("Se generó la certificación. Ahora puede descargarla en formato PDF.",
+                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkgreen', 'font-size': 13}),
+                            None)
                     except Exception as e:
-                        print(f"Error durante la conversión a PDF: {e}")
+                        return (html.Div(f"Error durante la conversión a PDF: {e}",
+                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                            None)
                     finally:
                         # Liberar COM
                         pythoncom.CoUninitialize()
                 else:
-                    print(f"El archivo {nombre_archivo_final} no existe, no se puede convertir a PDF.")
-                return html.Div("Se generó la certificación.", style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkgreen', 'font-size': 13})
+                    return (html.Div("Error: El archivo no se generó correctamente.",
+                                style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                        None)
             except Exception as e:
                 error_traceback = traceback.format_exc()
-                return html.Div([html.Div(f"Intente más tarde, se produjo un error al generar la certificación: {e}",
-                                          style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
-                                 html.Pre(error_traceback,
-                                          style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})])
-        return html.Div("Haga clic en este botón para generar la certificación:", style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13})
+                return (html.Div([html.Div(f"Error al generar la certificación: {e}",
+                                      style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                             html.Pre(error_traceback,
+                                      style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})]), None)
 
+        # Lógica para descargar el certificado cuando se presiona el botón "Descargar"
+        elif n_clicks is None and n_clicks2 is None:
+            return (html.Div("Haga clic en este botón para generar la certificación:",
+                            style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13}),
+                    None)
+
+        # Lógica de descarga del certificado
+        if n_clicks2 and archivo_pdf_generado:
+            return (None, dcc.send_bytes(archivo_pdf_generado, "certificacion.pdf"))
+
+        return (None, None)
+    
     # @app.callback(
     #     Output("output-represanalis", "children"),#Output("output-state", "children"),
     #     Input("represanalis-button", "n_clicks"),#Input("generar-button", "n_clicks"),

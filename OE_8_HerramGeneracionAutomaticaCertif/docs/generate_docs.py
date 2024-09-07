@@ -12,7 +12,7 @@ def create_certificate(template_path, output_path, data):
     doc = Document(template_path)
     # Lógica para llenar la plantilla con datos
     doc.save(output_path)
-
+    
 def create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, lat, lon):
     template_path = "PlantillaOficioLamentoSinEstaciones.docx"
     doc = Document(template_path)
@@ -59,7 +59,6 @@ def select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, corre
         clave_plantilla = selected_variable
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
         stationdf_fnl['Fecha'] = pd.to_datetime(stationdf_fnl['Fecha'], format='%Y-%m-%d %H:%M:%S.%f')
-
         sufij_periodo = {"horaria": '%Y-%m-%d %H:%M', "diaria": '%Y-%m-%d', "mensual": '%Y-%m', "anual": '%Y'}
         for sufij, period in sufij_periodo.items():
             if selected_variable.endswith(sufij):
@@ -77,9 +76,8 @@ def select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, corre
             doc = reemplazar_datos(doc, nombres, apellidos, dias, meses, ano, selected_variable, estacion_seleccionada)
 
         und = set_und(selected_variable)
-        stationdf_fnl['Valor'].fillna('ND', inplace=True)
-        stationdf_fnl.rename(columns={'Valor': f"{selected_variable} ({und})"}, inplace=True)
-    
+        stationdf_fnl.loc[:, 'Valor'] = stationdf_fnl['Valor'].fillna('ND')
+        stationdf_fnl = stationdf_fnl.rename(columns={'Valor': f"{selected_variable} ({und})"})
     return doc, nombre_plantilla
 
 def insert_table_in_doc(doc, data_frame, selected_variable):
@@ -155,3 +153,5 @@ def insert_table_in_doc(doc, data_frame, selected_variable):
     tblPr.append(tblHeader)
     
     return doc
+
+
