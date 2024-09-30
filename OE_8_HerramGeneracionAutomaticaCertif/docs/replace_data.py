@@ -17,14 +17,14 @@ def reemplazar_datos_en_runs(paragraph, search_text, replace_text):
         else:
             paragraph.add_run(new_text)
 
-def reemplazar_datos_noEMC(doc, nombres, apellidos, correo, descrip_solicit, lat_pi, lon_pi):
+def reemplazar_datos_noEMC(doc, nombres, apellidos, correo, descrip_solicit, clickinfo):#, lat_pi, lon_pi):
     datos = {
         "{{NOMBRES}}": nombres.upper(),
         "{{APELLIDOS}}": apellidos.upper(),
         "{{CORREO}}": correo,
         "{{DESCRIP_SOLICIT}}": descrip_solicit,
-        "{{LAT_PI}}": str(lat_pi),
-        "{{LONG_PI}}": str(lon_pi)
+        "{{LAT_PI}}": str(clickinfo[0]),#str(lat_pi),
+        "{{LONG_PI}}": str(clickinfo[1])#str(lon_pi)
     }
     for p in doc.paragraphs:
         for key, value in datos.items():

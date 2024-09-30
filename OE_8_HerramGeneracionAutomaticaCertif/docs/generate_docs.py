@@ -13,10 +13,10 @@ def create_certificate(template_path, output_path, data):
     # Lógica para llenar la plantilla con datos
     doc.save(output_path)
     
-def create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, lat, lon):
+def create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, clickinfo):
     template_path = "PlantillaOficioLamentoSinEstaciones.docx"
     doc = Document(template_path)
-    doc = reemplazar_datos_noEMC(doc, nombres, apellidos, correo, descrip_solicit, lat, lon)
+    doc = reemplazar_datos_noEMC(doc, nombres, apellidos, correo, descrip_solicit, clickinfo)
     return doc
 
 def create_certificate_nodata(nombres, apellidos, correo, dias, meses, ano, selected_variable, estacion_seleccionada, descrip_solicit):
