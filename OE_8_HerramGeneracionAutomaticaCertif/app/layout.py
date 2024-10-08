@@ -363,9 +363,15 @@ def create_layout(app, data):
                         con respecto a su punto de interés haciendo click en este botón",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
+                dcc.Store(id='gp-result-store'),
                 html.Div(id="output-represanalis"),
-                html.Button("Analizar estaciones representativas", style={
+                
+                html.Div([
+                    html.Button("Analizar estaciones representativas", style={
                             'font-family': 'arial'}, id="represanalis-button"),
+                    html.Button("Descargar certificación", id="descargar-button"),
+                ]),
+                
 
                 html.P("A partir del ejercicio anterior, seleccione la estación de su interés",
                     style={'font-family': 'arial', 'margin-top': '20px'}),
@@ -380,9 +386,10 @@ def create_layout(app, data):
 
                 # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
-
+                
+                dcc.Store(id='certtyc-result-store'),
                 html.Div(id='output-state'),
-
+                
                 # html.Div([
                 #     dcc.ConfirmDialog(
                 #         id='output-state',
@@ -393,7 +400,7 @@ def create_layout(app, data):
                 html.Div([
                     html.Button("Generar Certificación", style={
                             'font-family': 'arial'}, id="generar-button"),
-                    html.Button("Descargar certificación", id="descargar-button"),
+                    html.Button("Descargar certificación", id="descargar2-button"),
                     dcc.Download(id="download-certif")
                 ]),
 
@@ -412,7 +419,10 @@ def create_layout(app, data):
                 ], style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                 # Espaciador
-                html.Div(style={'height': '20px', 'width': '100%'})
+                html.Div(style={'height': '20px', 'width': '100%'}),
+
+                # Guardado de información
+                html.Div(id='saved-information')
 
             ]),
 

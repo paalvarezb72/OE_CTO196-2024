@@ -11,6 +11,7 @@ import io
 import time
 #from docs.replace_data import reemplazar_datos_noEMC, reemplazar_datos_nan, reemplazar_datos_precip, reemplazar_datos
 from dash import html, dcc
+from datetime import datetime
 from dash.dependencies import Input, Output, State
 from docs.generate_docs import create_certificate, create_certificate_no_station, select_plantilla, insert_table_in_doc
 from utils.helpers import * #(obtener_sensor, construir_rango_fechas, construir_codestacion, 
@@ -22,6 +23,8 @@ from utils.validation import validate_inputs
 from docx import Document
 from docx2pdf import convert
 from utils.request_gp.RequestGp import RequestGp
+from utils.request_gp.update_table import UpdateTable
+
 # Añadir la ruta del módulo 'main_firma.py'
 ruta_modulo = r'C:/Users/user/Documents/IDEAM/2024/ESRI/herramienta_certificaciones_TyC/geoprocessing-service/app/dummies'
 sys.path.append(ruta_modulo)
@@ -420,7 +423,9 @@ def register_callbacks(app,data):
     #     return (None, None)
     
     @app.callback(
-        Output("output-represanalis", "children"),#Output("output-state", "children"),
+        [Output("gp-result-store", "data"), #Output("output-represanalis", "children"),
+         Output("output-state", "children"),
+         Output("certtyc-result-store", "data")],
         Input("represanalis-button", "n_clicks"),#Input("generar-button", "n_clicks"),
         [State("file-storage", "data"),  # Obtener el itemid_file guardado
          State("nombres-input", "value"),
@@ -433,26 +438,24 @@ def register_callbacks(app,data):
          State("tiposerie-dp", "value"),
          State("upload-data", "filename"),
          State("click-info", "children")]
-         #State("estacion-dropdown", "value"),
-         #State("sin-estaciones", "value"),
-         #State("lat-input", "value"),
-         #State("lon-input", "value")]
     )
 
     def generar_certificado(n_clicks, itemid_file, nombres, apellidos, correo, dias, meses, ano, selected_var, selected_variable, upld, clickinfo):#, estacion_nombre, sin_estacion, lat, lon):
         if n_clicks is not None:
             try:
                 # Verificar que los campos obligatorios siempre estén llenos
-                if not (nombres and apellidos and selected_variable): #and estacion_nombre):
-                    return html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
-                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
+                if not (nombres and apellidos and correo and selected_variable ): #and estacion_nombre):
+                    return (None, html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
+                                           style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
+                            None)
 
                 # Validar fechas según la periodicidad seleccionada
                 if (('anual' in selected_variable.lower() and not ano) or
                     ('mensual' in selected_variable.lower() and not (meses and ano)) or
                     ('diaria' in selected_variable.lower() and not (dias and meses and ano))):
-                    return html.Div("Por favor, seleccione las fechas correspondientes para obtener su certificación.",
-                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
+                    return (None, html.Div("Por favor, seleccione las fechas correspondientes para obtener su certificación.",
+                                           style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
+                            None)
 
                 descrip_solicit = construir_descripsolicit(selected_variable)
                 # Llamar las funciones de RequestGP.py
@@ -476,8 +479,9 @@ def register_callbacks(app,data):
                     doc = create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, clickinfo)
                     nombre_archivo_final = f"Modif_{plantillas_por_variable['Sin Estación']}"
                     doc.save(nombre_archivo_final)
-                    return html.Div("Respuesta generada para punto de interés sin estaciones cercanas representativas.",
-                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13})
+                    return (resultado_gp,html.Div("Respuesta generada para punto de interés sin estaciones cercanas representativas.",
+                                                  style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13}),
+                            "Certificación tipo oficio lamento sin estaciones cercanas")
                 
                 elif resultado_gp["status"] == "OK":
                     cod_estacion = resultado_gp["message"]
@@ -508,19 +512,137 @@ def register_callbacks(app,data):
 
                     nombre_archivo_final = f"Modif_{nombre_plantilla}"
                     doc.save(nombre_archivo_final)
-                    return html.Div("Se generó la certificación.", style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkgreen', 'font-size': 13})
+                    return (resultado_gp,html.Div("Se generó la certificación.", style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkgreen', 'font-size': 13}),
+                            "Certificación generada")
                 
                 elif resultado_gp["status"] == "ERROR":
-                    return html.Div(resultado_gp["message"],
-                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
+                    mensaje_error = resultado_gp["message"]
+                    return (resultado_gp, html.Div(f"No se pudo procesar la solicitud,{mensaje_error}",
+                                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
+                            mensaje_error)
                 else:
                     mensaje_faltante = resultado_gp["message"]
-                    return html.Div(f"No se pudo procesar la solicitud,{mensaje_faltante}", style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
+                    return (resultado_gp, html.Div(f"No se pudo procesar la solicitud,{mensaje_faltante}", 
+                                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
+                            mensaje_faltante)
                 
             except Exception as e:
                 error_traceback = traceback.format_exc()
-                return html.Div([html.Div(f"Intente más tarde, se produjo un error al generar la certificación: {e}",
+                return (None, html.Div([html.Div(f"Intente más tarde, se produjo un error al generar la certificación: {e}",
                                           style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
                                  html.Pre(error_traceback,
-                                          style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})])
-        return html.Div("Haga clic en este botón para generar la certificación:", style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13})
+                                          style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})]),
+                        None)
+        return (None, html.Div("Haga clic en este botón para generar la certificación:", 
+                               style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13}),
+                None)
+    
+    @app.callback(
+        Output("saved-information", "children"),
+        Input("descargar-button", "n_clicks"),
+        # [Input("descargar-button", "n_clicks"),
+        #  Input("gp-result-store", "data"),
+        #  Input("certtyc-result-store", "data")],
+        [State("gp-result-store", "data"),
+         State("certtyc-result-store", "data"),
+         State("tpersona-ri","value"),
+         State("tdoc-dp", "value"),
+         State("ndoc-input", "value"),
+         State("nombres-input", "value"),
+         State("apellidos-input", "value"),
+         State("correo-input", "value"),
+         State("tel-input", "value"),
+         State("genero-dp", "value"),
+         State("genero-input", "value"),
+         State("grupetn-dp", "value"),
+         State("grupetn-input", "value"),
+         State("infpoblac-dp", "value"),
+         State("discap-dp", "value"),
+         State("discap-input", "value"),
+         State("ginteres-dp", "value"),
+         State("ginteres-input", "value"),
+         State("variable-dp", "value"),
+         State("tiposerie-dp", "value"),
+         State("dias-dropdown", "value"),
+         State("meses-dropdown", "value"),
+         State("ano-dropdown", "value"),
+         State("upload-data", "filename"),
+         State("click-info", "children")]
+    )
+    def guardresults_regsolicit_tb(n_clicks,gpresult,outstate,tpers,tdoc, ndoc, nombres, apell,
+                                   corr, tel, gendp, genin, getndp, getnin, infpob, discdp,
+                                   discin, gintdp, gintin, vardp, tipsrdp, dia, mes, ano, upld, clickinfo):
+        if n_clicks is None:
+            pass
+
+        if isinstance(gpresult, dict):
+            resultado_status = gpresult.get('status', 'Estado no disponible')
+            resultado_message = gpresult.get('message', 'Mensaje no disponible')
+        else:
+            print(f"gpresult no es un diccionario: {gpresult}")
+            resultado_status = "Estado no disponible"
+            resultado_message = "Mensaje no disponible"
+
+        if isinstance(outstate, str):
+            outstate_str = outstate
+        else:
+            print(f"outstate no es una cadena: {outstate}")
+            outstate_str = "Estado no disponible"
+
+        try:
+            # Operador ternario para asignaciones más limpias
+            gendp = gendp if gendp else genin
+            getndp = getndp if getndp else getnin
+            discdp = discdp if discdp else discin
+            gintdp = gintdp if gintdp else gintin
+
+            if upld is None:
+                coord = clickinfo
+                coord = (coord[0],coord[1])
+                coord_str = str(coord)
+                print(coord)
+            else:
+                coord = upld
+                coord_str = str(coord)
+
+            # Se toma la fecha y se trasnforma la fecha al formato adecuado
+            date_now = datetime.now()
+            #date_display = date_now.strftime("%Y-%m-%dT%H:%M:%S")
+
+            data_list = [
+                {
+                    "tpersona_ri": tpers,
+                    "tdoc_dp": tdoc,
+                    "ndoc_input": ndoc,
+                    "nombres_input": nombres,
+                    "apellidos_in": apell,
+                    "correo_input": corr,
+                    "tel_input": tel,
+                    "genero_dp": gendp,
+                    "genero_input": gendp,
+                    "grupetn_dp": getndp,
+                    "grupetn_input": getndp,
+                    "infpoblac_dp": infpob,
+                    "discap_dp": discdp,
+                    "discap_input": discdp,
+                    "ginteres_dp": gintdp,
+                    "ginteres_input": gintdp,
+                    "variable_dp": vardp,
+                    "tiposerie_dp": tipsrdp,
+                    "dias_dropdown": dia,
+                    "meses_dropdown": mes,
+                    "ano_dropdown": ano,
+                    "upload_zip_click_info": coord_str,
+                    "resultado_status_": resultado_status,
+                    "resultado_message_": resultado_message,
+                    "output_state": outstate_str,
+                    "date_displ": date_now
+                }]
+            update_table = UpdateTable()
+            result = update_table.actualizar_tabla(data_list)
+            print("Intentando subir los siguientes datos:", data_list)
+            print("Resultado de la actualización de la tabla:", result)
+
+            return "Datos guardados exitosamente"
+        except Exception as e:
+            print(f"Error en el proceso de cargue de datos: {e}")
