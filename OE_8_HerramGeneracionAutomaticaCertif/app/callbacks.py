@@ -3,6 +3,7 @@ import plotly.express as px
 import dash_leaflet as dl
 import base64
 import os
+import pytz
 import json
 import traceback
 import sys
@@ -11,7 +12,7 @@ import io
 import time
 #from docs.replace_data import reemplazar_datos_noEMC, reemplazar_datos_nan, reemplazar_datos_precip, reemplazar_datos
 from dash import html, dcc
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from dash.dependencies import Input, Output, State
 from docs.generate_docs import create_certificate, create_certificate_no_station, select_plantilla, insert_table_in_doc
 from utils.helpers import * #(obtener_sensor, construir_rango_fechas, construir_codestacion, 
@@ -574,6 +575,8 @@ def register_callbacks(app,data):
                                    discin, gintdp, gintin, vardp, tipsrdp, dia, mes, ano, upld, clickinfo):
         if n_clicks is None:
             pass
+        
+        update_table = UpdateTable()
 
         if isinstance(gpresult, dict):
             resultado_status = gpresult.get('status', 'Estado no disponible')
@@ -598,16 +601,22 @@ def register_callbacks(app,data):
 
             if upld is None:
                 coord = clickinfo
-                coord = (coord[0],coord[1])
-                coord_str = str(coord)
+                x = coord[1]
+                y = coord[0]
+                coord_s = (coord[0],coord[1])
+                coord_str = str(coord_s)
                 print(coord)
             else:
-                coord = upld
-                coord_str = str(coord)
+                print(upld)
+                coordenadas = update_table.obtener_coordenadas_zip(os.path.join(UPLOAD_DIRECTORY, upld))
+                extract_coords = (coordenadas[0][1],coordenadas[0][0])
+                coord_str = str(extract_coords)
+                x = coordenadas[0][0]
+                y = coordenadas[0][1]
 
-            # Se toma la fecha y se trasnforma la fecha al formato adecuado
+            # Fecha y hora actuales en la zona horaria local ## Es correspondiente y no es necesario
+            # cambiar la Timezone
             date_now = datetime.now()
-            #date_display = date_now.strftime("%Y-%m-%dT%H:%M:%S")
 
             data_list = [
                 {
@@ -636,9 +645,14 @@ def register_callbacks(app,data):
                     "resultado_status_": resultado_status,
                     "resultado_message_": resultado_message,
                     "output_state": outstate_str,
-                    "date_displ": date_now
+                    "date_displ": date_now,
+                    "geometry": {
+                        "x": x,
+                        "y": y,
+                        "spatialReference": {"wkid": 4326}
+                        }
                 }]
-            update_table = UpdateTable()
+            
             result = update_table.actualizar_tabla(data_list)
             print("Intentando subir los siguientes datos:", data_list)
             print("Resultado de la actualización de la tabla:", result)
