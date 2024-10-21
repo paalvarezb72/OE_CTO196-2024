@@ -62,10 +62,10 @@ def register_callbacks(app,data):
     def display_click_info(click_lat_lng):
         if click_lat_lng is None:
             return "Haga click en el mapa para obtener las coordenadas de su punto de interés"
-        print(click_lat_lng) # Ver en consola las coordenadas seleccionadas
+        print(f"Las coordenadas seleccinadas fueron: {click_lat_lng}") # Ver en consola las coordenadas seleccionadas
         
         coordenadas = (click_lat_lng["latlng"]["lat"], click_lat_lng["latlng"]["lng"])
-        return coordenadas
+        return f"Las coordenadas seleccinadas fueron: {coordenadas}"
     
     # def obtener_coordenadas(click_lat_lng):
     #     if isinstance(click_lat_lng, str):
@@ -538,6 +538,15 @@ def register_callbacks(app,data):
                                style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13}),
                 None)
     
+    @app.callback(
+        Output('esperar-dialog', 'displayed'),
+        Input('represanalis-button', 'n_clicks')
+    )
+    def show_confirm_dialog(n_clicks):
+        if n_clicks:
+            return True  # Muestra el diálogo
+        return False  # No muestra el diálogo
+
     @app.callback(
         Output("saved-information", "children"),
         Input("descargar-button", "n_clicks"),

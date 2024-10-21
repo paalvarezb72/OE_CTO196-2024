@@ -312,11 +312,18 @@ def create_layout(app, data):
                 ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}), 
 
                 # Espaciador
+                html.Div(style={'height': '30px', 'width': '100%'}),
+
+                html.H5("Información geográfica de su punto de interés: cargue la geometría o haga click en el mapa", 
+                        style={'font-family': 'arial', 'text-align': 'left'}, #, 'font-weight': 'bold'
+                        title="Inicio módulo geográfico de la aplicación"),
+
+                # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
 
-                html.P("A continuación, cargue en formato .zip la geometría tipo punto de su sitio\
-                        de interés o interactúe con el mapa para localizarlo. Recuerde incluir en la\
-                       carpeta comprimida todos los archivos que acompañan el .shp",
+                html.P("En esta caja, cargue en formato .zip la geometría tipo punto de su sitio\
+                        de interés. Recuerde incluir en la carpeta comprimida todos los archivos\
+                        que acompañan el .shp",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                 html.Div([
@@ -342,8 +349,8 @@ def create_layout(app, data):
                     dcc.Store(id='file-storage', storage_type='session'), 
                 ]),
 
-                html.P("Las coordenadas del click son:",
-                    style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
+                # Espaciador
+                html.Div(style={'height': '20px', 'width': '100%'}),
 
                 html.Div([
                     html.Div(id="click-info"),  # Div para mostrar la información del clic
@@ -359,52 +366,47 @@ def create_layout(app, data):
                         style={'width': '100%', 'height': '80vh'}, id="map"),
                 ]),
 
+                # Espaciador
+                html.Div(style={'height': '20px', 'width': '100%'}),
+
                 html.P("Ejecute el análisis de representatividad de estaciones meteorológicas\
-                        con respecto a su punto de interés haciendo click en este botón",
+                        con respecto a su punto de interés haciendo click en este botón. Una\
+                       vez se encuentre la estación más representativa, el sistema generará su certificación",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                 dcc.Store(id='gp-result-store'),
                 html.Div(id="output-represanalis"),
+
+                dcc.Store(id='certtyc-result-store'),
+                html.Div(id='output-state'),
+
+                html.Div([dcc.Store(id="pdf_data")]),
                 
                 html.Div([
                     html.Button("Analizar estaciones representativas", style={
                             'font-family': 'arial'}, id="represanalis-button"),
                     html.Button("Descargar certificación", id="descargar-button"),
+                    dcc.Download(id="download-certif")
                 ]),
                 
-
-                html.P("A partir del ejercicio anterior, seleccione la estación de su interés",
-                    style={'font-family': 'arial', 'margin-top': '20px'}),
-
-                dcc.Dropdown(
-                    id='estacion-dropdown',
-                    options=[{'label': nombre, 'value': nombre}
-                            for nombre in data['nombre']],
-                    style={'font-family': 'arial'},
-                    value=data['nombre'][0]  # Valor por defecto
-                ),
-
                 # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
                 
-                dcc.Store(id='certtyc-result-store'),
-                html.Div(id='output-state'),
-                
-                # html.Div([
-                #     dcc.ConfirmDialog(
-                #         id='output-state',
-                #         message='Danger danger! Are you sure you want to continue?',
-                #     )]),
-                # Espaciador
-                html.Div(style={'height': '10px', 'width': '100%'}),
                 html.Div([
-                    html.Button("Generar Certificación", style={
-                            'font-family': 'arial'}, id="generar-button"),
-                    html.Button("Descargar certificación", id="descargar2-button"),
-                    dcc.Download(id="download-certif")
-                ]),
+                    dcc.ConfirmDialog(
+                        id='esperar-dialog',
+                        message='Por favor, espere mientras su certificación se genera, no refresque la página.',
+                    )]),
+                # Espaciador
+                html.Div(style={'height': '20px', 'width': '100%'}),
+                # html.Div([
+                #     html.Button("Generar Certificación", style={
+                #             'font-family': 'arial'}, id="generar-button"),
+                #     html.Button("Descargar certificación", id="descargar2-button"),
+                #     dcc.Download(id="download-certif")
+                # ]),
 
-                html.Div(style={'height': '10px', 'width': '100%'}),
+                # html.Div(style={'height': '10px', 'width': '100%'}),
 
                 html.P([
                     "Al generar su certificación, usted acepta la política tratamiento y protección de datos personales, la cual, puede consultar en ",
