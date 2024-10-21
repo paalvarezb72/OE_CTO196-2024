@@ -65,7 +65,7 @@ def register_callbacks(app,data):
         print(f"Las coordenadas seleccinadas fueron: {click_lat_lng}") # Ver en consola las coordenadas seleccionadas
         
         coordenadas = (click_lat_lng["latlng"]["lat"], click_lat_lng["latlng"]["lng"])
-        return f"Las coordenadas seleccinadas fueron: {coordenadas}"
+        return coordenadas
     
     # def obtener_coordenadas(click_lat_lng):
     #     if isinstance(click_lat_lng, str):

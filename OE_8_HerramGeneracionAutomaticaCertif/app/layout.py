@@ -352,6 +352,9 @@ def create_layout(app, data):
                 # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
 
+                html.P("Las coordenadas que seleccionó de su punto de interés son:",
+                    style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '5px'}),
+
                 html.Div([
                     html.Div(id="click-info"),  # Div para mostrar la información del clic
                     dl.Map(center=[4, -74], zoom=10, 
