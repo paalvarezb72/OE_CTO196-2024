@@ -32,28 +32,6 @@ sys.path.append(ruta_modulo)
 #from main_firma import main
 
 def register_callbacks(app,data):
-    # @app.callback(
-    #     Output('distance-info', 'children'),
-    #     Input('calculate-distance-btn', 'n_clicks'),
-    #     State('map', 'clickData'), #State('mapa-estaciones', 'clickData'),
-    #     State('lat-input', 'value'),
-    #     State('lon-input', 'value')
-    # )
-    # def calculate_distance(n_clicks, clickData, lat, lon):
-    #     if n_clicks is None or clickData is None:
-    #         return html.Div("Seleccione una estación, luego, cuando vea el marcador rojo, introduzca las coordenadas \
-    #             de su punto de interés y oprima el botón 'Calcular distancia'.", style={'font-family': 'arial', 'font-size': 13})
-
-    #     estacion_lat = clickData['points'][0]['lat']
-    #     estacion_lon = clickData['points'][0]['lon']
-
-    #     if lat is None or lon is None:
-    #         return html.Div("Por favor, introduzca las coordenadas del punto de interés.", style={'font-family': 'arial', 'font-size': 13})
-
-    #     distancia = geopy.distance.distance(
-    #         (estacion_lat, estacion_lon), (lat, lon)).km
-    #     return html.Div(f"La distancia es: {distancia:.2f} km.", style={'font-family': 'arial', 'font-size': 15})
-
     # Callback para manejar clics en los marcadores
     @app.callback(
         Output("click-info", "children"),
@@ -66,16 +44,6 @@ def register_callbacks(app,data):
         
         coordenadas = (click_lat_lng["latlng"]["lat"], click_lat_lng["latlng"]["lng"])
         return coordenadas
-    
-    # def obtener_coordenadas(click_lat_lng):
-    #     if isinstance(click_lat_lng, str):
-    #         try:
-    #             click_lat_lng = json.loads(click_lat_lng)  # Convertir de JSON string a dict
-    #         except json.JSONDecodeError:
-    #             raise ValueError("El valor de clickinfo no es un JSON válido.")
-
-    #     coordenadas = (click_lat_lng["latlng"]["lat"], click_lat_lng["latlng"]["lng"])
-    #     return coordenadas
 
     UPLOAD_DIRECTORY = 'C:/Users/user/Documents/IDEAM/2024/Obligaciones_especificas_ejecucion/OE_8_HerramGeneracionAutomaticaCertif/shp_users_uploaded/'
     @app.callback(
@@ -97,89 +65,6 @@ def register_callbacks(app,data):
 
             return f'Archivo {filename} cargado y almacenado con éxito.'
         return "No se cargó ningún archivo."
-    
-    # @app.callback(
-    #     [Output('mapa-estaciones', 'figure'),
-    #      Output('lat-input', 'value'),
-    #      Output('lon-input', 'value')],
-    #     [Input('reset-button', 'n_clicks'),
-    #      Input('mapa-estaciones', 'clickData')],
-    #     prevent_initial_call=True
-    # )
-    # def update_map(n_clicks, clickData):
-    #     ctx = dash.callback_context
-    #     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
-
-    #     if triggered_id == 'reset-button':
-    #         fig = px.scatter_mapbox(data,
-    #                                 lat="latitud",
-    #                                 lon="longitud",
-    #                                 hover_name="nombre",
-    #                                 zoom=10,
-    #                                 mapbox_style="open-street-map")
-    #         return fig, None, None  # Reset everything
-
-    #     if clickData:
-    #         lat = clickData['points'][0]['lat']
-    #         lon = clickData['points'][0]['lon']
-    #         fig = px.scatter_mapbox(data,
-    #                                 lat="latitud",
-    #                                 lon="longitud",
-    #                                 hover_name="nombre",
-    #                                 zoom=10,
-    #                                 mapbox_style="open-street-map")
-    #         fig.add_scattermapbox(lat=[lat], lon=[lon], marker={
-    #                               'size': 15, 'color': 'red'})
-    #         return fig, None, None  # Update map with the station marker
-
-    #     return dash.no_update
-
-    # @app.callback(
-    #     Output('hidden-div', 'children'),
-    #     [Input('sin-estaciones', 'value'),
-    #      State('lat-input', 'value'),
-    #      State('lon-input', 'value')]
-    # )
-    # def handle_no_station(selection, lat, lon):
-    #     if selection == 'no_station':
-    #         return json.dumps({'lat': lat, 'lon': lon})
-    #     return dash.no_update
-
-    # @app.callback(
-    #     [Output('apellidos-input', 'disabled'),
-    #     Output('genero-dp', 'disabled'),
-    #     Output('genero-input', 'disabled'),
-    #     Output('grupetn-dp', 'disabled'),
-    #     Output('grupetn-input', 'disabled'),
-    #     Output('infpoblac-dp', 'disabled'),
-    #     Output('discap-dp', 'disabled'),
-    #     Output('discap-input', 'disabled'),
-    #     Output('ginteres-dp', 'disabled'),
-    #     Output('ginteres-input', 'disabled')],
-    #     [Input('tpersona-ri', 'value'),
-    #      Input('genero-dp', 'value'),
-    #      Input('grupetn-dp', 'value'),
-    #      Input('discap-dp','value'),
-    #      Input('ginteres-dp','value')]
-    # )
-    # def update_infopers_dropdowns(tpersona,gender,getn,discap,ginteres):
-    #     print(f"tpersona: {tpersona}, gender: {gender}, getn: {getn}, discap: {discap}, ginteres: {ginteres}")
-    #     if 'Persona jurídica' in tpersona:
-    #             return True,True,True,True,True,True,True,True,False,False
-    #     if gender:
-    #         if gender != 'Otro':
-    #             return False,False,True,False,False,False,False,False,False,False
-    #     if getn:
-    #         if getn != 'Otro':
-    #             return False,False,False,False,True,False,False,False,False,False
-    #     if discap:
-    #         if discap != 'Otra':
-    #             return False,False,False,False,False,False,False,True,False,False
-    #     if ginteres:
-    #         if ginteres != 'Otro':
-    #             return False,False,False,False,False,False,False,False,False,True
-
-    #     return False,False,False,False,False,False,False,False,False,False
 
     @app.callback(
         [Output('apellidos-input', 'disabled'),
@@ -321,58 +206,8 @@ def register_callbacks(app,data):
     # )
 
     # def generar_certificado(n_clicks, n_clicks2, nombres, apellidos, correo, dias, meses, ano, selected_variable, estacion_nombre):#, sin_estacion, lat, lon):
-        
-    #     # Lógica de generación de certificado
-    #     if n_clicks is not None and n_clicks2 is None:
-    #         try:
-    #             # Verificar que los campos obligatorios siempre estén llenos
-    #             if not (nombres and apellidos and selected_variable ):#and estacion_nombre):
-    #                 return html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
-    #                                 style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
 
-    #             # Validar fechas según la periodicidad seleccionada
-    #             if (('anual' in selected_variable.lower() and not ano) or
-    #                 ('mensual' in selected_variable.lower() and not (meses and ano)) or
-    #                 ('diaria' in selected_variable.lower() and not (dias and meses and ano))):
-    #                 return html.Div("Por favor, seleccione las fechas correspondientes para obtener su certificación.",
-    #                                 style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
-
-    #             descrip_solicit = construir_descripsolicit(selected_variable)
-    #             # if sin_estacion == 'no_station':
-    #             #     if not lat or not lon:
-    #             #         return html.Div("Por favor, diligencie los datos de ubicación (lat. y lon.) del punto de interés",
-    #             #                         style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13})
-    #             #     doc = create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, lat, lon)
-    #             #     nombre_archivo_final = f"Modif_{plantillas_por_variable['Sin Estación']}"
-    #             #     doc.save(nombre_archivo_final)
-    #             #     return html.Div("Respuesta generada para punto de interés sin estaciones cercanas representativas.",
-    #             #                     style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13})
-                
-    #             estacion_seleccionada = data[data['nombre'] == estacion_nombre].iloc[0]
-    #             inicio, fin = construir_rango_fechas(dias, meses, ano)
-    #             sensor = obtener_sensor(selected_variable)
-    #             codestacion = construir_codestacion(estacion_seleccionada)
-                
-    #             conn, cur = create_connection()
-    #             stationdf = fetch_station_data(cur, inicio, fin, sensor, codestacion)
-                
-    #             if 'viento' in selected_variable:
-    #                 stationdf['Valor'] = (stationdf['Valor'] * 3.6).round(1)
-
-    #             stationdf_fnl = aplicar_transformacion(stationdf, selected_variable)
-    #             modifdato_LimSup(stationdf_fnl, data, selected_variable, codestacion)
-
-    #             if selected_variable == "Precipitación total mensual":
-    #                 stationdf_fnl = calculate_indices(stationdf_fnl, normales, codestacion)
-
-    #             if selected_variable == "Velocidad del viento horaria":
-    #                 stationdf_dv = fetch_station_data(cur, inicio, fin, 'DVAG_CON', codestacion)
-    #                 stationdf_dv.rename(columns={'Valor': 'Dirección del viento (°)'}, inplace=True)
-    #                 stationdf_fnl = pd.merge(stationdf_dv, stationdf_fnl, on='Fecha')
-
-    #             doc, nombre_plantilla = select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, correo, dias, meses, ano, estacion_seleccionada, descrip_solicit)
-    #             doc = insert_table_in_doc(doc, stationdf_fnl, selected_variable)
-
+                # ...Todo el resto del código...
     #             nombre_archivo_final = f"Modif_{nombre_plantilla}"
     #             doc.save(nombre_archivo_final)
     #             # Se espera 1 segundo para asegurarse de que el archivo se haya guardado completamente

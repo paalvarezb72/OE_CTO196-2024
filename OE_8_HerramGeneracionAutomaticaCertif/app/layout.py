@@ -22,23 +22,6 @@ for layer in webmap.layers:
     print(layer.url)
 
 def create_layout(app, data):
-    # Se crean marcadores a partir de los datos
-    markers = [
-        dl.Marker(position=[row['latitud'], row['longitud']], 
-                  children=[
-                      dl.Tooltip(row['nombre']),
-                      dl.Popup(f"Altitud: {row['altitud']}")
-                  ],
-                  id={"type": "marker", "index": i})  # Añadir un identificador único para cada marcador
-        for i, row in data.iterrows()
-    ]
-    # fig = px.scatter_mapbox(data,
-    #                         lat="latitud",
-    #                         lon="longitud",
-    #                         hover_name="nombre",
-    #                         hover_data={"altitud": True},
-    #                         zoom=10,
-    #                         mapbox_style="open-street-map")
     # Se define la estructura de la página web
     layout = html.Div([
         # Banner
@@ -363,7 +346,9 @@ def create_layout(app, data):
                             #dl.LayerGroup(markers),
                             dl.LayerGroup([
                             dl.CircleMarker(center=[row['latitud'], row['longitud']], 
-                                            radius=2, color='blue', fill=True) for i, row in data.iterrows()]),
+                                            radius=2, color='blue', fill=True, 
+                                            children=[dl.Tooltip(f"Nombre: {row['nombre']}, Altitud: {row['altitudDEM']} m")
+                                                      ]) for i, row in data.iterrows()]),
                             dl.LayerGroup(id="click-layer")  # Capa para los clics
                         ], 
                         style={'width': '100%', 'height': '80vh'}, id="map"),
@@ -498,7 +483,3 @@ def create_layout(app, data):
     # })
 
     return layout
-
-# Se llama la función data_locLims para obtener los datos
-#data = data_locLims()
-#layout = create_layout(data)
