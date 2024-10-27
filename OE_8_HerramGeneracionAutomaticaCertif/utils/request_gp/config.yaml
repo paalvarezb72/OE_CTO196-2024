@@ -1,0 +1,18 @@
+portal:
+  url: "https://visualizador.ideam.gov.co/portal"
+  usuario: "gAAAAABmvl_ZDlnMBa15TPme0bg0WDtuF2-gJv0kd8gWEiN1XCCnLx7iDz7xCeZbfXIw6hJSU6oxV-d0hsBzP08nyGL5foCDuA=="
+  password: "gAAAAABmvl_Z9HQvyrXmDLywk9mr4DAp-qTQmwxrzMzvizWI6D0nCxXO285gem59Mw_p_2dDs1jsShHDmUGASs9-VNeZYvFo-g=="
+  fernet_key: "DvvHEjx6pqaB_L7GP7nhH_-fHttzY_eEcIT8SPJZFiY="
+
+geoprocesamiento:
+  url: "https://visualizador.ideam.gov.co/gisserver/rest/services/certificaciones_tyc/determinarEstacionMeteo/GPServer/"
+  url_upload: "https://visualizador.ideam.gov.co/gisserver/rest/services/certificaciones_tyc/determinarEstacionMeteo/GPServer/uploads/upload"
+  parametros_servicio_obligatorios: 
+    - "variable_meteorologica"
+  parametros_servicio_opcionales: 
+    - "area_interes_shape"
+    - "area_interes_coordenadas"
+  wgs84_spatial_reference_wkid: 4326
+
+tabla_registro:
+  url: "https://visualizador.ideam.gov.co/gisserver/rest/services/Hosted/Registro_solicitudes/FeatureServer/0"
