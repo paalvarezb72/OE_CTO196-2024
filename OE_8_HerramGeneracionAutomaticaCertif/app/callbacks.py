@@ -20,7 +20,6 @@ from utils.helpers import * #(obtener_sensor, construir_rango_fechas, construir_
                            #modifdfprecip_ClasifLimSup, get_normal_value, calculate_indices, 
                            #set_und, calculate_distance)
 from utils.db_connection import create_connection
-from utils.validation import validate_inputs
 from docx import Document
 from docx2pdf import convert
 from utils.request_gp.RequestGp import RequestGp
@@ -261,7 +260,8 @@ def register_callbacks(app,data):
     @app.callback(
         [Output("gp-result-store", "data"), #Output("output-represanalis", "children"),
          Output("output-state", "children"),
-         Output("certtyc-result-store", "data")],
+         Output("certtyc-result-store", "data"),
+         Output("download-certif", "data")],
         Input("represanalis-button", "n_clicks"),#Input("generar-button", "n_clicks"),
         [State("file-storage", "data"),  # Obtener el itemid_file guardado
          State("nombres-input", "value"),
@@ -283,7 +283,7 @@ def register_callbacks(app,data):
                 if not (nombres and apellidos and correo and selected_variable ): #and estacion_nombre):
                     return (None, html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
                                            style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
-                            None)
+                            None, None)
 
                 # Validar fechas según la periodicidad seleccionada
                 if (('anual' in selected_variable.lower() and not ano) or
@@ -291,7 +291,7 @@ def register_callbacks(app,data):
                     ('diaria' in selected_variable.lower() and not (dias and meses and ano))):
                     return (None, html.Div("Por favor, seleccione las fechas correspondientes para obtener su certificación.",
                                            style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
-                            None)
+                            None, None)
 
                 descrip_solicit = construir_descripsolicit(selected_variable)
                 # Llamar las funciones de RequestGP.py
@@ -317,7 +317,7 @@ def register_callbacks(app,data):
                     doc.save(nombre_archivo_final)
                     return (resultado_gp,html.Div("Respuesta generada para punto de interés sin estaciones cercanas representativas.",
                                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13}),
-                            "Certificación tipo oficio lamento sin estaciones cercanas")
+                            "Certificación tipo oficio lamento sin estaciones cercanas", None)
                 
                 elif resultado_gp["status"] == "OK":
                     cod_estacion = resultado_gp["message"]
@@ -348,19 +348,42 @@ def register_callbacks(app,data):
 
                     nombre_archivo_final = f"Modif_{nombre_plantilla}"
                     doc.save(nombre_archivo_final)
+                    # Se espera 1 segundo para asegurarse de que el archivo se haya guardado completamente
+                    time.sleep(1)
+                    if os.path.exists(nombre_archivo_final):
+                        # Inicializa COM
+                        try: 
+                            pythoncom.CoInitialize()
+                            pdf_path = f'{nombre_archivo_final[:-5]}.pdf'
+                            convert(nombre_archivo_final, pdf_path)
+                            # Guardar el archivo PDF en un buffer
+                            buffer = io.BytesIO()
+                            with open(pdf_path, 'rb') as f:
+                                buffer.write(f.read())
+                            buffer.seek(0)
+                            archivo_pdf_generado = buffer.read()
+                        except Exception as e:
+                            return (resultado_gp, html.Div(f"Error durante la conversión a PDF: {e}",
+                                        style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                                    "Archivo no generado en PDF", None)
+                        finally:
+                            # Liberar COM
+                            pythoncom.CoUninitialize()
+
                     return (resultado_gp,html.Div("Se generó la certificación.", style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkgreen', 'font-size': 13}),
-                            "Certificación generada")
+                            "Certificación generada", 
+                            dcc.send_file(pdf_path))
                 
                 elif resultado_gp["status"] == "ERROR":
                     mensaje_error = resultado_gp["message"]
                     return (resultado_gp, html.Div(f"No se pudo procesar la solicitud,{mensaje_error}",
                                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
-                            mensaje_error)
+                            mensaje_error, None)
                 else:
                     mensaje_faltante = resultado_gp["message"]
                     return (resultado_gp, html.Div(f"No se pudo procesar la solicitud,{mensaje_faltante}", 
                                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
-                            mensaje_faltante)
+                            mensaje_faltante, None)
                 
             except Exception as e:
                 error_traceback = traceback.format_exc()
@@ -368,10 +391,10 @@ def register_callbacks(app,data):
                                           style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
                                  html.Pre(error_traceback,
                                           style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})]),
-                        None)
+                        None, None)
         return (None, html.Div("Haga clic en este botón para generar la certificación:", 
                                style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13}),
-                None)
+                None, None)
     
     @app.callback(
         Output('esperar-dialog', 'displayed'),
@@ -412,7 +435,8 @@ def register_callbacks(app,data):
          State("meses-dropdown", "value"),
          State("ano-dropdown", "value"),
          State("upload-data", "filename"),
-         State("click-info", "children")]
+         State("click-info", "children")],
+         prevent_initial_call=True
     )
     def guardresults_regsolicit_tb(n_clicks,gpresult,outstate,tpers,tdoc, ndoc, nombres, apell,
                                    corr, tel, gendp, genin, getndp, getnin, infpob, discdp,
