@@ -1,3 +1,4 @@
+# app/callbacks.py
 import dash
 import plotly.express as px
 import dash_leaflet as dl
@@ -14,11 +15,9 @@ import time
 from dash import html, dcc
 from datetime import datetime, timedelta, timezone
 from dash.dependencies import Input, Output, State
-from docs.generate_docs import create_certificate, create_certificate_no_station, select_plantilla, insert_table_in_doc
-from utils.helpers import * #(obtener_sensor, construir_rango_fechas, construir_codestacion, 
-                           #construir_descripsolicit, fetch_station_data, aplicar_transformacion, 
-                           #modifdfprecip_ClasifLimSup, get_normal_value, calculate_indices, 
-                           #set_und, calculate_distance)
+from docs.generate_docs import *
+from docs.convert_a_pdf import convertir_a_pdf
+from utils.helpers import *
 from utils.db_connection import create_connection
 from docx import Document
 from docx2pdf import convert
@@ -112,7 +111,7 @@ def register_callbacks(app,data):
             genero_input_disabled,
             grupetn_dp_disabled,
             grupetn_input_disabled,
-            False,  # infpoblac-dp (no tiene lógica relacionada en tu código)
+            False,  # infpoblac-dp siempre habilitado
             discap_dp_disabled,
             discap_input_disabled,
             ginteres_dp_disabled,
@@ -183,85 +182,12 @@ def register_callbacks(app,data):
         "Sin Datos": "PlantillaOficioLamentoSinDatos.docx",
         "Sin Estación": "PlantillaOficioLamentoSinEstaciones.docx"
     }
-
-    # # Variable global para almacenar el archivo PDF generado
-    # @app.callback(
-    #     [Output("output-state", "children"),
-    #      Output("download-certif", "data")],
-    #     [Input("generar-button", "n_clicks"), 
-    #      Input("descargar-button", "n_clicks")],
-    #     [State("nombres-input", "value"),
-    #      State("apellidos-input", "value"),
-    #      State("correo-input", "value"),
-    #      State("dias-dropdown", "value"),
-    #      State("meses-dropdown", "value"),
-    #      State("ano-dropdown", "value"),
-    #      State("tiposerie-dp", "value"),
-    #      State("estacion-dropdown", "value")#,
-    #      #State("sin-estaciones", "value"),
-    #      #State("lat-input", "value"),
-    #      #State("lon-input", "value")
-    #      ]
-    # )
-
-    # def generar_certificado(n_clicks, n_clicks2, nombres, apellidos, correo, dias, meses, ano, selected_variable, estacion_nombre):#, sin_estacion, lat, lon):
-
-                # ...Todo el resto del código...
-    #             nombre_archivo_final = f"Modif_{nombre_plantilla}"
-    #             doc.save(nombre_archivo_final)
-    #             # Se espera 1 segundo para asegurarse de que el archivo se haya guardado completamente
-    #             time.sleep(1)
-    #             if os.path.exists(nombre_archivo_final):
-    #                 # Inicializa COM
-    #                 try: 
-    #                     pythoncom.CoInitialize()
-    #                     pdf_path = f'{nombre_archivo_final[:-5]}.pdf'
-    #                     convert(nombre_archivo_final, pdf_path)
-    #                     # Guardar el archivo PDF en un buffer
-    #                     buffer = io.BytesIO()
-    #                     with open(pdf_path, 'rb') as f:
-    #                         buffer.write(f.read())
-    #                     buffer.seek(0)
-    #                     archivo_pdf_generado = buffer.read()
-
-    #                     return (html.Div("Se generó la certificación. Ahora puede descargarla en formato PDF.",
-    #                                 style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkgreen', 'font-size': 13}),
-    #                         None)
-    #                 except Exception as e:
-    #                     return (html.Div(f"Error durante la conversión a PDF: {e}",
-    #                                 style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
-    #                         None)
-    #                 finally:
-    #                     # Liberar COM
-    #                     pythoncom.CoUninitialize()
-    #             else:
-    #                 return (html.Div("Error: El archivo no se generó correctamente.",
-    #                             style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
-    #                     None)
-    #         except Exception as e:
-    #             error_traceback = traceback.format_exc()
-    #             return (html.Div([html.Div(f"Error al generar la certificación: {e}",
-    #                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
-    #                          html.Pre(error_traceback,
-    #                                   style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})]), None)
-
-    #     # Lógica para descargar el certificado cuando se presiona el botón "Descargar"
-    #     elif n_clicks is None and n_clicks2 is None:
-    #         return (html.Div("Haga clic en este botón para generar la certificación:",
-    #                         style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13}),
-    #                 None)
-
-    #     # Lógica de descarga del certificado
-    #     if n_clicks2: #and archivo_pdf_generado:
-    #         return (None, dcc.send_bytes(archivo_pdf_generado, "certificacion.pdf"))
-
-    #     return (None, None)
-    
+   
     @app.callback(
         [Output("gp-result-store", "data"), #Output("output-represanalis", "children"),
          Output("output-state", "children"),
          Output("certtyc-result-store", "data"),
-         Output("download-certif", "data")],
+         Output("pdf_data", "data")],
         Input("represanalis-button", "n_clicks"),#Input("generar-button", "n_clicks"),
         [State("file-storage", "data"),  # Obtener el itemid_file guardado
          State("nombres-input", "value"),
@@ -313,11 +239,18 @@ def register_callbacks(app,data):
                 print(resultado_gp)
                 if resultado_gp["status"] == "NO_STATION":            
                     doc = create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, clickinfo)
-                    nombre_archivo_final = f"Modif_{plantillas_por_variable['Sin Estación']}"
+                    date_rnow_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    nombre_archivo_final = f"{date_rnow_str}_{plantillas_por_variable['Sin Estación']}"
                     doc.save(nombre_archivo_final)
+                    pdf_path = convertir_a_pdf(nombre_archivo_final)
+                    print(f'El path es {pdf_path}')
+                    if pdf_path is None:
+                        return (resultado_gp, html.Div(f"No se pudo generar el archivo PDF",
+                                                       style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                                "Archivo PDF no generado", None)
                     return (resultado_gp,html.Div("Respuesta generada para punto de interés sin estaciones cercanas representativas.",
                                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13}),
-                            "Certificación tipo oficio lamento sin estaciones cercanas", None)
+                            "Certificación tipo oficio lamento sin estaciones cercanas", pdf_path)
                 
                 elif resultado_gp["status"] == "OK":
                     cod_estacion = resultado_gp["message"]
@@ -342,38 +275,41 @@ def register_callbacks(app,data):
                         stationdf_dv = fetch_station_data(cur, inicio, fin, 'DVAG_CON', codestacion)
                         stationdf_dv.rename(columns={'Valor': 'Dirección del viento (°)'}, inplace=True)
                         stationdf_fnl = pd.merge(stationdf_fnl, stationdf_dv, on='Fecha')
+                    
+                    print(stationdf_fnl)
+                    # Resultado si no hay datos
+                    if stationdf_fnl.empty:
+                        doc = create_certificate_nodata(nombres, apellidos, correo, dias, meses, ano, selected_variable, 
+                                                            estacion_seleccionada, descrip_solicit)
+                        date_rnow_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        nombre_archivo_final = f"{date_rnow_str}_{plantillas_por_variable['Sin Datos']}"
+                        doc.save(nombre_archivo_final)
+                        pdf_path = convertir_a_pdf(nombre_archivo_final)
+                        print(f'El path es {pdf_path}')
+                        if pdf_path is None:
+                            return (resultado_gp, html.Div(f"No se pudo generar el archivo PDF",
+                                                        style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                                    "Archivo PDF no generado", None)
+                        return (resultado_gp,html.Div("Respuesta generada para punto de interés con estación representativa sin datos disponibles para las fechas seleccionadas.",
+                                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13}),
+                                "Certificación tipo oficio lamento sin datos", pdf_path)
 
                     doc, nombre_plantilla = select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, correo, dias, meses, ano, estacion_seleccionada, descrip_solicit)
                     doc = insert_table_in_doc(doc, stationdf_fnl, selected_variable)
 
-                    nombre_archivo_final = f"Modif_{nombre_plantilla}"
+                    date_rnow_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    nombre_archivo_final = f"{date_rnow_str}_{nombre_plantilla}"
                     doc.save(nombre_archivo_final)
-                    # Se espera 1 segundo para asegurarse de que el archivo se haya guardado completamente
-                    time.sleep(1)
-                    if os.path.exists(nombre_archivo_final):
-                        # Inicializa COM
-                        try: 
-                            pythoncom.CoInitialize()
-                            pdf_path = f'{nombre_archivo_final[:-5]}.pdf'
-                            convert(nombre_archivo_final, pdf_path)
-                            # Guardar el archivo PDF en un buffer
-                            buffer = io.BytesIO()
-                            with open(pdf_path, 'rb') as f:
-                                buffer.write(f.read())
-                            buffer.seek(0)
-                            archivo_pdf_generado = buffer.read()
-                        except Exception as e:
-                            return (resultado_gp, html.Div(f"Error durante la conversión a PDF: {e}",
-                                        style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
-                                    "Archivo no generado en PDF", None)
-                        finally:
-                            # Liberar COM
-                            pythoncom.CoUninitialize()
-
+                    pdf_path = convertir_a_pdf(nombre_archivo_final)
+                    print(f'El path es {pdf_path}')
+                    if pdf_path is None:
+                        return (resultado_gp, html.Div(f"No se pudo generar el archivo PDF",
+                                                       style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                                "Archivo PDF no generado", None)
+                    
                     return (resultado_gp,html.Div("Se generó la certificación.", style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkgreen', 'font-size': 13}),
-                            "Certificación generada", 
-                            dcc.send_file(pdf_path))
-                
+                            "Certificación generada", pdf_path)
+    
                 elif resultado_gp["status"] == "ERROR":
                     mensaje_error = resultado_gp["message"]
                     return (resultado_gp, html.Div(f"No se pudo procesar la solicitud,{mensaje_error}",
@@ -406,13 +342,15 @@ def register_callbacks(app,data):
         return False  # No muestra el diálogo
 
     @app.callback(
-        Output("saved-information", "children"),
+        [Output("saved-information", "children"),
+         Output("download-certif", "data")],
         Input("descargar-button", "n_clicks"),
         # [Input("descargar-button", "n_clicks"),
         #  Input("gp-result-store", "data"),
         #  Input("certtyc-result-store", "data")],
         [State("gp-result-store", "data"),
          State("certtyc-result-store", "data"),
+         State("pdf_data", "data"),
          State("tpersona-ri","value"),
          State("tdoc-dp", "value"),
          State("ndoc-input", "value"),
@@ -438,10 +376,10 @@ def register_callbacks(app,data):
          State("click-info", "children")],
          prevent_initial_call=True
     )
-    def guardresults_regsolicit_tb(n_clicks,gpresult,outstate,tpers,tdoc, ndoc, nombres, apell,
+    def guardresults_regsolicit_tb(n_clicks,gpresult,outstate,pdf_path,tpers,tdoc, ndoc, nombres, apell,
                                    corr, tel, gendp, genin, getndp, getnin, infpob, discdp,
                                    discin, gintdp, gintin, vardp, tipsrdp, dia, mes, ano, upld, clickinfo):
-        if n_clicks is None:
+        if n_clicks and pdf_path is None:
             pass
         
         update_table = UpdateTable()
@@ -525,6 +463,17 @@ def register_callbacks(app,data):
             print("Intentando subir los siguientes datos:", data_list)
             print("Resultado de la actualización de la tabla:", result)
 
-            return "Datos guardados exitosamente"
+            return ("Datos guardados exitosamente", dcc.send_file(pdf_path))
         except Exception as e:
             print(f"Error en el proceso de cargue de datos: {e}")
+            return (None, None)
+        
+    @app.callback(
+        Output('esperarpdf-dialog', 'displayed'),
+        Input('descargar-button', 'n_clicks')
+    )
+    def show_pdf_dialog(n_clicks):
+        if n_clicks:
+            return True  # Muestra el diálogo
+        return False  # No muestra el diálogo
+    

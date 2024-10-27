@@ -2,12 +2,16 @@
 import pandas as pd
 import numpy as np
 import re
+import pythoncom
+import time
+import io
+import os
+import data.derivadasclc as dvd
 from datetime import datetime
 from docx import Document
 from utils.db_connection import create_connection
-import geopy.distance
-import data.derivadasclc as dvd
 from data.data_reading import data_normales
+from docx2pdf import convert
 
 def obtener_sensor(selected_variable):
     # Diccionario que mapea prefijos de variables a códigos de sensor
@@ -225,10 +229,3 @@ def set_und(selected_variable):
 
     # Retorna None o un valor por defecto si no se encuentra un prefijo correspondiente
     return None
-
-def calculate_distance(lat, lon, estacion_lat, estacion_lon):
-    if lat is None or lon is None:
-        return "Por favor, introduzca las coordenadas del punto de interés."
-    
-    distancia = geopy.distance.distance((estacion_lat, estacion_lon), (lat, lon)).km
-    return f"La distancia es: {distancia:.2f} km."

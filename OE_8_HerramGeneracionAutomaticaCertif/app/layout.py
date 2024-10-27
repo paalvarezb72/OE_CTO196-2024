@@ -367,8 +367,6 @@ def create_layout(app, data):
 
                 dcc.Store(id='certtyc-result-store'),
                 html.Div(id='output-state'),
-
-                html.Div([dcc.Store(id="pdf_data")]),
                 
                 html.Div([
                     html.Button("Analizar estaciones representativas", style={
@@ -376,15 +374,28 @@ def create_layout(app, data):
                     html.Button("Descargar certificación", id="descargar-button"),
                     dcc.Download(id="download-certif")
                 ]),
+
+                dcc.Store(id="pdf_data"),
                 
                 # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
                 
-                html.Div([
-                    dcc.ConfirmDialog(
-                        id='esperar-dialog',
-                        message='Por favor, espere mientras su certificación se genera, no refresque la página.',
-                    )]),
+                dcc.ConfirmDialog(
+                    id='esperar-dialog',
+                    message='Por favor, espere mientras su certificación se genera, no refresque la página.\
+                        \n Encima del botón de Análisis usted verá el mensaje correspondiente; oprima luego "Descargar certificación".',
+                    ),
+
+                dcc.ConfirmDialog(
+                    id='esperar-dialog',
+                    message='Por favor, espere mientras su certificación se genera, no refresque la página.\
+                        \n Encima del botón de Análisis usted verá el mensaje correspondiente; oprima luego "Descargar certificación".',
+                    ),
+                dcc.ConfirmDialog(
+                    id='esperarpdf-dialog',
+                    message='Por favor, espere mientras se descarga su certificación. No refresque la página',
+                    ),
+                       
                 # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
                 # html.Div([
