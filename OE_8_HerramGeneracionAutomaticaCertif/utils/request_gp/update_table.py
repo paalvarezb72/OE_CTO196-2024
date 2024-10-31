@@ -1,3 +1,5 @@
+import os
+import zipfile
 from datetime import datetime
 from arcpy import env, MakeFeatureLayer_management, Describe, Project_management
 from arcpy.da import SearchCursor
@@ -5,10 +7,6 @@ from arcpy.management import Delete
 from arcgis.gis import GIS
 from arcgis.features import FeatureLayer, Feature
 from utils.request_gp.utils import obtener_configuracion, descifrar_datos, addMessage
-from datetime import datetime
-
-import os
-import zipfile
 
 class UpdateTable:
     """

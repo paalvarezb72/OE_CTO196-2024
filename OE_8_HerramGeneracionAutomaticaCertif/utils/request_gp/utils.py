@@ -1,8 +1,8 @@
-from cryptography.fernet import Fernet
-
 import logging
 import os
 import yaml
+from cryptography.fernet import Fernet
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 

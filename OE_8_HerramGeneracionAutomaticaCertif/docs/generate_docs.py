@@ -1,12 +1,12 @@
 # docs/generate_docs.py
-from docx import Document
 import pandas as pd
 import locale
-from docs.replace_data import *
-from utils.helpers import set_und  # Asegúrate de que set_und esté correctamente definido en helpers.py
+from docx import Document
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from docx.shared import Pt
+from docs.replace_data import *
+from utils.helpers import set_und
 
 def create_certificate(template_path, output_path, data):
     doc = Document(template_path)

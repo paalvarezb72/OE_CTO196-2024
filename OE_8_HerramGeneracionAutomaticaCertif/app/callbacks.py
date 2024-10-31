@@ -1,26 +1,16 @@
 # app/callbacks.py
 import dash
-import plotly.express as px
-import dash_leaflet as dl
 import base64
 import os
-import pytz
-import json
 import traceback
 import sys
-import pythoncom
-import io
-import time
-#from docs.replace_data import reemplazar_datos_noEMC, reemplazar_datos_nan, reemplazar_datos_precip, reemplazar_datos
 from dash import html, dcc
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from dash.dependencies import Input, Output, State
 from docs.generate_docs import *
 from docs.convert_a_pdf import convertir_a_pdf
 from utils.helpers import *
 from utils.db_connection import create_connection
-from docx import Document
-from docx2pdf import convert
 from utils.request_gp.RequestGp import RequestGp
 from utils.request_gp.update_table import UpdateTable
 
@@ -37,7 +27,7 @@ def register_callbacks(app,data):
     )
     def display_click_info(click_lat_lng):
         if click_lat_lng is None:
-            return "Haga click en el mapa para obtener las coordenadas de su punto de interés"
+            return "Si no cargó ningún shape, haga click en el mapa para obtener las coordenadas de su punto de interés"
         print(f"Las coordenadas seleccinadas fueron: {click_lat_lng}") # Ver en consola las coordenadas seleccionadas
         
         coordenadas = (click_lat_lng["latlng"]["lat"], click_lat_lng["latlng"]["lng"])
@@ -62,7 +52,7 @@ def register_callbacks(app,data):
                 f.write(decoded)
 
             return f'Archivo {filename} cargado y almacenado con éxito.'
-        return "No se cargó ningún archivo."
+        return "No se ha cargado ningún archivo."
 
     @app.callback(
         [Output('apellidos-input', 'disabled'),
@@ -328,7 +318,7 @@ def register_callbacks(app,data):
                                  html.Pre(error_traceback,
                                           style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})]),
                         None, None)
-        return (None, html.Div("Haga clic en este botón para generar la certificación:", 
+        return (None, html.Div("Haga click en el botón de 'Analizar...' para generar la certificación:", 
                                style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13}),
                 None, None)
     

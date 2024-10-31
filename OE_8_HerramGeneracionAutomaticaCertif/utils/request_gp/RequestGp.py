@@ -16,8 +16,8 @@
 
 from arcgis.gis import GIS
 from arcgis.geoprocessing import import_toolbox
-from utils.request_gp.utils import addMessage, descifrar_datos, obtener_configuracion
 from typing import Dict, Any
+from utils.request_gp.utils import addMessage, descifrar_datos, obtener_configuracion
 
 import requests
 

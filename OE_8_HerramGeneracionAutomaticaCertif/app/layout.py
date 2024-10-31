@@ -1,13 +1,10 @@
 # app/layout.py
 from dash import html, dcc
-import plotly.express as px
 import pandas as pd
 import dash_leaflet as dl
 from arcgis.gis import GIS
 from arcgis.mapping import WebMap
 from arcgis.features import FeatureLayer
-#from data.data_reading import data_locLims
-#from app.app import app
 
 gis = GIS("https://visualizador.ideam.gov.co/portal", "GDRM_IDEAM", "Meteo2024.")
 
@@ -66,16 +63,26 @@ def create_layout(app, data):
                         title="Datos obtenidos de la red de observación en superficie IDEAM "),
                 # Espaciador
                 html.Div(style={'height': '10px', 'width': '100%'}),
-                html.P(["Respetado usuario, diligiencie todos los campos para obtener su certificación. Tenga\
+                html.P("Instrucciones:", style={'font-family': 'arial', 'text-align': 'justify','font-size': 11,
+                                                'font-weight': 'bold', 'margin-bottom': '5px'}),
+                html.P("Respetado usuario, en esta aplicación podrá obtener certificaciones del estado del tiempo;\
+                        para ello se solicitarán datos sus personales, de contacto, variable meteorológica y periodo de\
+                        interés, así como las fechas requeridas y ubicación del punto de interés; por lo cual, antes de\
+                        empezar, es importante que conozca esta información pues su certificación estará basada en ella.\
+                        Recuerde que puede disponer del shape completo (archivos .cpg, .dbf, .prj, .sbn, .sbx, .shp, .shx)\
+                        comprimidos en .zip para ubicar su punto de interés o saber donde ubicarlo haciendo click en el\
+                        mapa más adelante.",
+                        style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px',
+                               'font-size': 11}),
+                html.P(["Por favor, diligiencie todos los campos para obtener su certificación. Tenga\
                        en cuenta la ",
                        dcc.Link("política de tratamiento y protección de datos personales.",
                                 href="https://www.ideam.gov.co/sites/default/files/archivos/politica_de_tratamiento_y_proteccion_de_datos_personales_0.pdf",
                                 target="_blank")],
-                       style={'text-align': 'justify', 'margin-bottom': '20px'}), #'font-family': 'arial', 
+                       style={'text-align': 'justify', 'margin-bottom': '20px', 'font-weight': 'bold'}), #'font-family': 'arial', 
                 html.Div([
                     html.P("Datos personales:", style={'font-family': 'arial', 'text-align': 'center',
-                                                       'font-weight': 'bold', 
-                                                    'font-size': 13}),
+                                                       'font-weight': 'bold', 'font-size': 13}),
                 ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
                 html.Div([
                     html.Div([
@@ -238,7 +245,7 @@ def create_layout(app, data):
                 html.Div(style={'height': '20px', 'width': '100%'}),
 
                 html.P("Por favor, escoja las fechas de interés para su certificación. Si  requiere\
-                    un rango, seleccione solo los días/meses/años correspondientes a la fecha inicial y final:",
+                    un rango, seleccione solo los días/meses/años de a la fecha inicial y final:",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                 html.Div([
@@ -304,9 +311,9 @@ def create_layout(app, data):
                 # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
 
-                html.P("En esta caja, cargue en formato .zip la geometría tipo punto de su sitio\
-                        de interés. Recuerde incluir en la carpeta comprimida todos los archivos\
-                        que acompañan el .shp",
+                html.P("En esta caja, cargue en formato .zip la geometría tipo punto (un solo punto) de\
+                        su sitio de interés. Recuerde incluir en la carpeta comprimida todos los archivos\
+                        que acompañan el .shp (.cpg, .dbf, .prj, .sbn, .sbx, .shx)",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                 html.Div([
@@ -351,16 +358,21 @@ def create_layout(app, data):
                                                       ]) for i, row in data.iterrows()]),
                             dl.LayerGroup(id="click-layer")  # Capa para los clics
                         ], 
-                        style={'width': '100%', 'height': '80vh'}, id="map"),
+                        style={'width': '100%', 'height': '70vh'}, id="map"),
                 ]),
 
                 # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
 
-                html.P("Ejecute el análisis de representatividad de estaciones meteorológicas\
-                        con respecto a su punto de interés haciendo click en este botón. Una\
-                       vez se encuentre la estación más representativa, el sistema generará su certificación",
-                    style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
+                html.P("Haga click en el botón 'Analizar estaciones representativas' para ejecutar el análisis\
+                        de representatividad de estaciones meteorológicas. Una vez se encuentre la estación más\
+                        representativa, el sistema generará su certificación.",
+                    style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '10px'}),
+
+                html.P("Oprima el botón 'Descargar certificación' solo cuando el mensaje de encima de los botones\
+                       haya cambiado a uno de color verde o naranja.",
+                    style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px', 'font-weight': 'bold',
+                           'font-size': 13}),
 
                 dcc.Store(id='gp-result-store'),
                 html.Div(id="output-represanalis"),
@@ -386,11 +398,6 @@ def create_layout(app, data):
                         \n Encima del botón de Análisis usted verá el mensaje correspondiente; oprima luego "Descargar certificación".',
                     ),
 
-                dcc.ConfirmDialog(
-                    id='esperar-dialog',
-                    message='Por favor, espere mientras su certificación se genera, no refresque la página.\
-                        \n Encima del botón de Análisis usted verá el mensaje correspondiente; oprima luego "Descargar certificación".',
-                    ),
                 dcc.ConfirmDialog(
                     id='esperarpdf-dialog',
                     message='Por favor, espere mientras se descarga su certificación. No refresque la página',

@@ -1,0 +1,6 @@
+prestodb
+dash
+dash-leaflet
+docx
+docx2pdf
+geopy

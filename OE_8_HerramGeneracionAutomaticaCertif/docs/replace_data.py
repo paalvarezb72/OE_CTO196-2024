@@ -1,8 +1,5 @@
 # docs/replace_data.py
-from docx import Document
 from docx.shared import Pt
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
 
 def reemplazar_datos_en_runs(paragraph, search_text, replace_text):
     text = paragraph.text

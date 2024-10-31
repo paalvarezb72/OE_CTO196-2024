@@ -2,16 +2,9 @@
 import pandas as pd
 import numpy as np
 import re
-import pythoncom
-import time
-import io
-import os
 import data.derivadasclc as dvd
 from datetime import datetime
-from docx import Document
-from utils.db_connection import create_connection
 from data.data_reading import data_normales
-from docx2pdf import convert
 
 def obtener_sensor(selected_variable):
     # Diccionario que mapea prefijos de variables a códigos de sensor
