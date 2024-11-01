@@ -180,9 +180,17 @@ def register_callbacks(app,data):
          Output("pdf_data", "data")],
         Input("represanalis-button", "n_clicks"),#Input("generar-button", "n_clicks"),
         [State("file-storage", "data"),  # Obtener el itemid_file guardado
+         State("tdoc-dp", "value"),
+         State("ndoc-input", "value"),
          State("nombres-input", "value"),
          State("apellidos-input", "value"),
+         State("genero-dp", "value"),
+         State("grupetn-dp", "value"),
+         State("infpoblac-dp", "value"),
+         State("discap-dp", "value"),
+         State("ginteres-dp", "value"),
          State("correo-input", "value"),
+         State("tel-input", "value"),
          State("dias-dropdown", "value"),
          State("meses-dropdown", "value"),
          State("ano-dropdown", "value"),
@@ -192,11 +200,13 @@ def register_callbacks(app,data):
          State("click-info", "children")]
     )
 
-    def generar_certificado(n_clicks, itemid_file, nombres, apellidos, correo, dias, meses, ano, selected_var, selected_variable, upld, clickinfo):#, estacion_nombre, sin_estacion, lat, lon):
+    def generar_certificado(n_clicks, itemid_file, tdoc, ndoc, nombres, apellidos, gendp, getndp, infpob, discdp, gintdp,
+                            correo, tel, dias, meses, ano, selected_var, selected_variable, upld, clickinfo):#, estacion_nombre, sin_estacion, lat, lon):
         if n_clicks is not None:
             try:
                 # Verificar que los campos obligatorios siempre estén llenos
-                if not (nombres and apellidos and correo and selected_variable ): #and estacion_nombre):
+                if not (tdoc and ndoc and nombres and apellidos and gendp and getndp and infpob and discdp and
+                        gintdp and correo and tel and selected_variable): #and estacion_nombre):
                     return (None, html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
                                            style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
                             None, None)

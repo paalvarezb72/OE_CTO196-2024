@@ -97,7 +97,7 @@ def create_layout(app, data):
                             'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
                         dcc.Dropdown(['Cédula de ciudadanía', 'NIT', 'Tarjeta de identidad', 'Cédula de extranjería',
                                     'Pasaporte', 'Permiso especial de permanencia - PEP',
-                                    'Permiso de protección temporal - PPT'], value='Cédula de ciudadanía', id="tdoc-dp"),
+                                    'Permiso de protección temporal - PPT'], id="tdoc-dp"), #value='Cédula de ciudadanía', 
                     ], style={'flex': '1', 'padding': '0 6px', 'font-size': 12}),                                               
                     html.Div([
                         html.Label("Número de documento:", style={
@@ -124,8 +124,8 @@ def create_layout(app, data):
                     html.Div([
                         html.Label("Género:", style={
                             'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
-                        dcc.Dropdown(['Femenino', 'Masculino', 'No deseo registrar esta información', 'Otro'], 
-                                    value='Femenino', id="genero-dp"),
+                        dcc.Dropdown(['Femenino', 'Masculino', 'No deseo registrar esta información', 'Otro'], #value='Femenino', 
+                                     id="genero-dp"),
                         html.Label("¿Cuál?", style={
                             'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Input(id="genero-input", type="text", placeholder='Digite el género'),
@@ -134,7 +134,7 @@ def create_layout(app, data):
                         html.Label("Grupo étnico:", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(['Indígena', 'Gitano (rom)', 'Negro, mulato, afrodescendiente, afrocolombiano, raizal o Palenquero',
-                                  'Otro','Ninguno'], value='Indígena', id="grupetn-dp"),
+                                  'Otro','Ninguno'], id="grupetn-dp"), # value='Indígena',
                         html.Label("¿Cuál?", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Input(id="grupetn-input", type="text", placeholder='Digite el grupo étnico'),
@@ -150,14 +150,14 @@ def create_layout(app, data):
                         dcc.Dropdown(['Niños, Niñas y Adolescentes', 'Adulto Mayor', 'Mujer cabeza de familia',
                                       'Personas en condición de discapacidad', 'Población LGBTIQ+',
                                       'Personas desplazadas por la violencia y aquellas que se encuentran en pobreza extrema',
-                                      'Ninguno'], value='Niños, Niñas y Adolescentes', id="infpoblac-dp"),
+                                      'Ninguno'], id="infpoblac-dp"), #value='Niños, Niñas y Adolescentes',
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '80px', 'font-size': 12}),
 
                     html.Div([
                         html.Label("¿Presenta discapacidad?", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(['Física', 'Auditiva', 'Visual','Sordoceguera', 'Intelectual – Cognitiva',
-                                      'Psicosocial', 'Talla baja','Otra','Ninguna'], value='Física', id="discap-dp"),
+                                      'Psicosocial', 'Talla baja','Otra','Ninguna'], id="discap-dp"), #value='Física'
                         html.Label("¿Cuál?", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Input(id="discap-input", type="text", placeholder='Digite el grupo étnico'),
@@ -168,8 +168,7 @@ def create_layout(app, data):
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Dropdown(['Ciudadano', 'Empresa privada', 'Academia','Ente de control', 'Medio de comunicación',
                                       'Extranjero', 'Entidad pública','Organismo internacional', 'Usuario interno o colaborador',
-                                      'Otro'], 
-                                      value='Ciudadano', id="ginteres-dp"),
+                                      'Otro'], id="ginteres-dp"), # value='Ciudadano',
                         html.Label("¿Cuál?", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
                         dcc.Input(id="ginteres-input", type="text", placeholder='Digite el grupo étnico'),
