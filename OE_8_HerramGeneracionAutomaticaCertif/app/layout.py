@@ -66,15 +66,14 @@ def create_layout(app, data):
                 html.P("Instrucciones:", style={'font-family': 'arial', 'text-align': 'justify','font-size': 11,
                                                 'font-weight': 'bold', 'margin-bottom': '5px'}),
                 html.P("Respetado usuario, en esta aplicación podrá obtener certificaciones del estado del tiempo;\
-                        para ello se solicitarán datos sus personales, de contacto, variable meteorológica y periodo de\
-                        interés, así como las fechas requeridas y ubicación del punto de interés; por lo cual, antes de\
-                        empezar, es importante que conozca esta información pues su certificación estará basada en ella.\
-                        Recuerde que puede disponer del shape completo (archivos .cpg, .dbf, .prj, .sbn, .sbx, .shp, .shx)\
-                        comprimidos en .zip para ubicar su punto de interés o saber donde ubicarlo haciendo click en el\
-                        mapa más adelante.",
+                        para ello se solicitarán sus datos personales, de contacto, variable meteorológica, periodo,\
+                        ubicación y fechas de interés; por lo cual, antes de empezar, es importante que conozca esta\
+                        información. Recuerde que puede disponer de un shape que debe estar completo (archivos .cpg,\
+                        .dbf, .prj, .sbn, .sbx, .shp, .shx) y comprimido en .zip para ubicar el punto de interés o saber\
+                        donde localizarlo para hacer click en el mapa más adelante.",
                         style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px',
                                'font-size': 11}),
-                html.P(["Por favor, diligiencie todos los campos para obtener su certificación. Tenga\
+                html.P(["Por favor, diligiencie todos los campos para obtener su certificación. Son OBLIGATORIOS. Tenga\
                        en cuenta la ",
                        dcc.Link("política de tratamiento y protección de datos personales.",
                                 href="https://www.ideam.gov.co/sites/default/files/archivos/politica_de_tratamiento_y_proteccion_de_datos_personales_0.pdf",
@@ -160,7 +159,7 @@ def create_layout(app, data):
                                       'Psicosocial', 'Talla baja','Otra','Ninguna'], id="discap-dp"), #value='Física'
                         html.Label("¿Cuál?", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
-                        dcc.Input(id="discap-input", type="text", placeholder='Digite el grupo étnico'),
+                        dcc.Input(id="discap-input", type="text", placeholder='Digite la discapacidad'),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '80px', 'font-size': 12}),
 
                     html.Div([
@@ -171,7 +170,7 @@ def create_layout(app, data):
                                       'Otro'], id="ginteres-dp"), # value='Ciudadano',
                         html.Label("¿Cuál?", style={
                                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
-                        dcc.Input(id="ginteres-input", type="text", placeholder='Digite el grupo étnico'),
+                        dcc.Input(id="ginteres-input", type="text", placeholder='Digite el grupo de interés'),
                     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '80px', 'font-size': 12}),                   
                 ], style={'display': 'flex', 'justify-content': 'flex-start', 'flex-wrap': 'wrap'}),
 
@@ -243,8 +242,10 @@ def create_layout(app, data):
                 # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
 
-                html.P("Por favor, escoja las fechas de interés para su certificación. Si  requiere\
-                    un rango, seleccione solo los días/meses/años de a la fecha inicial y final:",
+                html.P("Por favor, escoja las fechas de interés para su certificación. Si  requiere un rango,\
+                        seleccione solo los días/meses/años de a la fecha inicial y final. Por ejemplo, si escogió\
+                        'Precipitación total diaria' y necesita los datos de todos los días de enero y febrero de 2021,\
+                        elija en 'Día(s)' el número 1 y el número 28, en 'Meses(es)', 'Enero' y 'Febrero' y en 'Año(s)', 2021",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                 html.Div([
