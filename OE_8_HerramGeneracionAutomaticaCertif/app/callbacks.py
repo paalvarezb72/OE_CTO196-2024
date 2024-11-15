@@ -180,6 +180,7 @@ def register_callbacks(app,data):
          Output("pdf_data", "data")],
         Input("represanalis-button", "n_clicks"),#Input("generar-button", "n_clicks"),
         [State("file-storage", "data"),  # Obtener el itemid_file guardado
+         State("tpersona-ri","value"),
          State("tdoc-dp", "value"),
          State("ndoc-input", "value"),
          State("nombres-input", "value"),
@@ -200,23 +201,29 @@ def register_callbacks(app,data):
          State("click-info", "children")]
     )
 
-    def generar_certificado(n_clicks, itemid_file, tdoc, ndoc, nombres, apellidos, gendp, getndp, infpob, discdp, gintdp,
+    def generar_certificado(n_clicks, itemid_file, tpers, tdoc, ndoc, nombres, apellidos, gendp, getndp, infpob, discdp, gintdp,
                             correo, tel, dias, meses, ano, selected_var, selected_variable, upld, clickinfo):#, estacion_nombre, sin_estacion, lat, lon):
         if n_clicks is not None:
             try:
                 # Verificar que los campos obligatorios siempre estén llenos
-                if not (tdoc and ndoc and nombres and apellidos and gendp and getndp and infpob and discdp and
-                        gintdp and correo and tel and selected_variable): #and estacion_nombre):
-                    return (None, html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
-                                           style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
-                            None, None)
+                if tpers == 'Persona jurídica':
+                    if not (tdoc and ndoc and nombres and apellidos and gintdp and correo and tel and selected_variable): #and estacion_nombre):
+                        return (None, html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
+                                            style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
+                                None, None)
+                elif tpers == 'Persona natural':
+                    if not (tdoc and ndoc and nombres and apellidos and gendp and getndp and infpob and discdp and
+                            gintdp and correo and tel and selected_variable): #and estacion_nombre):
+                        return (None, html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
+                                            style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
+                                None, None)
 
                 # Validar fechas según la periodicidad seleccionada
                 if (('anual' in selected_variable.lower() and not ano) or
                     ('mensual' in selected_variable.lower() and not (meses and ano)) or
                     ('diaria' in selected_variable.lower() and not (dias and meses and ano))):
                     return (None, html.Div("Por favor, seleccione las fechas correspondientes para obtener su certificación.",
-                                           style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
+                                           style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
                             None, None)
 
                 descrip_solicit = construir_descripsolicit(selected_variable)
@@ -246,10 +253,10 @@ def register_callbacks(app,data):
                     print(f'El path es {pdf_path}')
                     if pdf_path is None:
                         return (resultado_gp, html.Div(f"No se pudo generar el archivo PDF",
-                                                       style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                                                       style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 16}),
                                 "Archivo PDF no generado", None)
                     return (resultado_gp,html.Div("Respuesta generada para punto de interés sin estaciones cercanas representativas.",
-                                                  style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13}),
+                                                  style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 16}),
                             "Certificación tipo oficio lamento sin estaciones cercanas", pdf_path)
                 
                 elif resultado_gp["status"] == "OK":
@@ -288,10 +295,10 @@ def register_callbacks(app,data):
                         print(f'El path es {pdf_path}')
                         if pdf_path is None:
                             return (resultado_gp, html.Div(f"No se pudo generar el archivo PDF",
-                                                        style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                                                        style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 16}),
                                     "Archivo PDF no generado", None)
                         return (resultado_gp,html.Div("Respuesta generada para punto de interés con estación representativa sin datos disponibles para las fechas seleccionadas.",
-                                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 13}),
+                                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 16}),
                                 "Certificación tipo oficio lamento sin datos", pdf_path)
 
                     doc, nombre_plantilla = select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, correo, dias, meses, ano, estacion_seleccionada, descrip_solicit)
@@ -304,42 +311,84 @@ def register_callbacks(app,data):
                     print(f'El path es {pdf_path}')
                     if pdf_path is None:
                         return (resultado_gp, html.Div(f"No se pudo generar el archivo PDF",
-                                                       style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                                                       style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 16}),
                                 "Archivo PDF no generado", None)
                     
-                    return (resultado_gp,html.Div("Se generó la certificación.", style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkgreen', 'font-size': 13}),
+                    return (resultado_gp,html.Div("Se generó la certificación.", style={'font-family': 'Arial', 'font-style': 'italic',
+                                                                                        'color': 'green', 'font-size': 16}),
                             "Certificación generada", pdf_path)
     
                 elif resultado_gp["status"] == "ERROR":
                     mensaje_error = resultado_gp["message"]
                     return (resultado_gp, html.Div(f"No se pudo procesar la solicitud,{mensaje_error}",
-                                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
+                                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
                             mensaje_error, None)
                 else:
                     mensaje_faltante = resultado_gp["message"]
                     return (resultado_gp, html.Div(f"No se pudo procesar la solicitud,{mensaje_faltante}", 
-                                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 13}),
+                                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
                             mensaje_faltante, None)
                 
             except Exception as e:
                 error_traceback = traceback.format_exc()
                 return (None, html.Div([html.Div(f"Intente más tarde, se produjo un error al generar la certificación: {e}",
-                                          style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 13}),
+                                          style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 16}),
                                  html.Pre(error_traceback,
                                           style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})]),
                         None, None)
         return (None, html.Div("Haga click en el botón de 'Analizar...' para generar la certificación:", 
-                               style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 13}),
+                               style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 16}),
                 None, None)
-    
+
     @app.callback(
-        Output('esperar-dialog', 'displayed'),
-        Input('represanalis-button', 'n_clicks')
+        Output("esperar-dialog", "displayed"),
+        Input("represanalis-button", "n_clicks"),
+        State("output-state", "children")
     )
-    def show_confirm_dialog(n_clicks):
-        if n_clicks:
-            return True  # Muestra el diálogo
-        return False  # No muestra el diálogo
+    def prompt_dialog(n_clicks, output_state_content):
+        print("n_clicks:", n_clicks)
+        print("output_state_content:", output_state_content)
+        n_clicks = n_clicks or 0
+        # Extraer el mensaje de output_state_content
+        if output_state_content is not None:
+            message = output_state_content.get("props", {}).get("children", "")
+            print(f"n_clicks: {n_clicks}, message: {message}")
+
+            invalidstates = ["Haga click en el botón de 'Analizar...' para generar la certificación:",
+                             "Por favor, diligencie completamente el formulario para obtener su certificación."]
+            # Lógica para mostrar el cuadro de diálogo
+            dialog_displayed = n_clicks > 0 and message not in invalidstates 
+            print(f"Estado del diálogo (mostrar): {dialog_displayed}")
+        
+            return dialog_displayed
+        else:
+            return None
+        
+    @app.callback(
+        Output("descargar-button", "disabled"),
+        Input("represanalis-button", "n_clicks"),
+        State("output-state", "children")
+    )
+    def update_button(n_clicks, output_state_content):
+        print("n_clicks:", n_clicks)
+        print("output_state_content:", output_state_content)
+        n_clicks = n_clicks or 0
+        # Extraer el mensaje de output_state_content
+        if output_state_content is not None:
+            message = output_state_content.get("props", {}).get("children", "")
+            print(f"n_clicks: {n_clicks}, message: {message}")
+
+            # Lógica para habilitar el botón de descarga
+            button_disabled = message not in [
+                "Se generó la certificación.", 
+                "Respuesta generada para punto de interés con estación representativa sin datos disponibles para las fechas seleccionadas.",
+                "Respuesta generada para punto de interés sin estaciones cercanas representativas."
+            ]
+            print(f"Estado del botón de descarga (deshabilitado): {button_disabled}")
+
+            return not button_disabled
+        else:
+            return None
 
     @app.callback(
         [Output("saved-information", "children"),

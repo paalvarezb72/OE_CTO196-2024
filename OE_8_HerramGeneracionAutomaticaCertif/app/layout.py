@@ -2,6 +2,7 @@
 from dash import html, dcc
 import pandas as pd
 import dash_leaflet as dl
+import dash_bootstrap_components as dbc
 from arcgis.gis import GIS
 from arcgis.mapping import WebMap
 from arcgis.features import FeatureLayer
@@ -67,10 +68,9 @@ def create_layout(app, data):
                                                 'font-weight': 'bold', 'margin-bottom': '5px'}),
                 html.P("Respetado usuario, en esta aplicación podrá obtener certificaciones del estado del tiempo;\
                         para ello se solicitarán sus datos personales, de contacto, variable meteorológica, periodo,\
-                        ubicación y fechas de interés; por lo cual, antes de empezar, es importante que conozca esta\
-                        información. Recuerde que puede disponer de un shape que debe estar completo (archivos .cpg,\
-                        .dbf, .prj, .sbn, .sbx, .shp, .shx) y comprimido en .zip para ubicar el punto de interés o saber\
-                        donde localizarlo para hacer click en el mapa más adelante.",
+                        ubicación y fechas de interés. Recuerde que puede disponer de un shape completo (archivos .cpg,\
+                        .dbf, .prj, .sbn, .sbx, .shp, .shx) y comprimido en .zip para ubicar el punto de interés o\
+                        hacer click en el mapa más adelante.",
                         style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px',
                                'font-size': 11}),
                 html.P(["Por favor, diligiencie todos los campos para obtener su certificación. Son OBLIGATORIOS. Tenga\
@@ -378,12 +378,23 @@ def create_layout(app, data):
                 html.Div(id="output-represanalis"),
 
                 dcc.Store(id='certtyc-result-store'),
-                html.Div(id='output-state'),
-                
+                #html.Div(id='output-state'),
+
+                # Mostrar indicador de carga
+                dcc.Loading(
+                    id="loading-indicator",
+                    type="circle",  # Tipo de loading (circle, dot, o default)
+                    children=html.Div(id="output-state"),  # Div de salida
+                    fullscreen=True,
+                    overlay_style={"visibility":"visible", "filter": "blur(2px)"},
+                    #overlay_style={"visibility":"visible", "opacity": .5, "backgroundColor": "white"},
+                    custom_spinner=html.H1(["Espere mientras se genera su certificación", dbc.Spinner(color="#0090FF")])
+                    ),
+                    
                 html.Div([
                     html.Button("Analizar estaciones representativas", style={
                             'font-family': 'arial'}, id="represanalis-button"),
-                    html.Button("Descargar certificación", id="descargar-button"),
+                    html.Button("Descargar certificación", id="descargar-button", disabled=True),
                     dcc.Download(id="download-certif")
                 ]),
 
@@ -405,14 +416,6 @@ def create_layout(app, data):
                        
                 # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
-                # html.Div([
-                #     html.Button("Generar Certificación", style={
-                #             'font-family': 'arial'}, id="generar-button"),
-                #     html.Button("Descargar certificación", id="descargar2-button"),
-                #     dcc.Download(id="download-certif")
-                # ]),
-
-                # html.Div(style={'height': '10px', 'width': '100%'}),
 
                 html.P([
                     "Al generar su certificación, usted acepta la política tratamiento y protección de datos personales, la cual, puede consultar en ",
