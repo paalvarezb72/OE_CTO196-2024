@@ -73,7 +73,8 @@ def create_layout(app, data):
                         hacer click en el mapa más adelante.",
                         style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px',
                                'font-size': 11}),
-                html.P(["Por favor, diligiencie todos los campos para obtener su certificación. Son OBLIGATORIOS. Tenga\
+                html.P(["Se genera una certificación por variable y periodo, si requiere más, recargue la página luego de terminar el proceso.\
+                         Por favor, diligiencie todos los campos para obtener su certificación, Son OBLIGATORIOS. Tenga\
                        en cuenta la ",
                        dcc.Link("política de tratamiento y protección de datos personales.",
                                 href="https://www.ideam.gov.co/sites/default/files/archivos/politica_de_tratamiento_y_proteccion_de_datos_personales_0.pdf",
@@ -388,9 +389,12 @@ def create_layout(app, data):
                     fullscreen=True,
                     overlay_style={"visibility":"visible", "filter": "blur(2px)"},
                     #overlay_style={"visibility":"visible", "opacity": .5, "backgroundColor": "white"},
-                    custom_spinner=html.H1(["Espere mientras se genera su certificación", dbc.Spinner(color="#0090FF")])
+                    custom_spinner=html.H2(["Espere unos minutos mientras se genera su certificación", dbc.Spinner(color="#0090FF")],
+                                           style={'text-align': 'center'})
                     ),
-                    
+                
+                dcc.Store(id="message-store"),
+
                 html.Div([
                     html.Button("Analizar estaciones representativas", style={
                             'font-family': 'arial'}, id="represanalis-button"),
@@ -405,8 +409,7 @@ def create_layout(app, data):
                 
                 dcc.ConfirmDialog(
                     id='esperar-dialog',
-                    message='Por favor, espere mientras su certificación se genera, no refresque la página.\
-                        \n Encima del botón de Análisis usted verá el mensaje correspondiente; oprima luego "Descargar certificación".',
+                    message='Se habilitó el botón de "Descargar certificación".',
                     ),
 
                 dcc.ConfirmDialog(

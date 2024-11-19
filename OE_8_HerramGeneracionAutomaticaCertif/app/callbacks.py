@@ -177,7 +177,8 @@ def register_callbacks(app,data):
         [Output("gp-result-store", "data"), #Output("output-represanalis", "children"),
          Output("output-state", "children"),
          Output("certtyc-result-store", "data"),
-         Output("pdf_data", "data")],
+         Output("pdf_data", "data"),
+         Output("message-store", "data")],
         Input("represanalis-button", "n_clicks"),#Input("generar-button", "n_clicks"),
         [State("file-storage", "data"),  # Obtener el itemid_file guardado
          State("tpersona-ri","value"),
@@ -208,23 +209,26 @@ def register_callbacks(app,data):
                 # Verificar que los campos obligatorios siempre estén llenos
                 if tpers == 'Persona jurídica':
                     if not (tdoc and ndoc and nombres and apellidos and gintdp and correo and tel and selected_variable): #and estacion_nombre):
-                        return (None, html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
+                        message_sdpj = "Por favor, diligencie completamente el formulario para obtener su certificación."
+                        return (None, html.Div(message_sdpj,
                                             style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
-                                None, None)
+                                None, None, message_sdpj)
                 elif tpers == 'Persona natural':
                     if not (tdoc and ndoc and nombres and apellidos and gendp and getndp and infpob and discdp and
                             gintdp and correo and tel and selected_variable): #and estacion_nombre):
-                        return (None, html.Div("Por favor, diligencie completamente el formulario para obtener su certificación.",
+                        message_sdpn = "Por favor, diligencie completamente el formulario para obtener su certificación."
+                        return (None, html.Div(message_sdpn,
                                             style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
-                                None, None)
+                                None, None, message_sdpn)
 
                 # Validar fechas según la periodicidad seleccionada
                 if (('anual' in selected_variable.lower() and not ano) or
                     ('mensual' in selected_variable.lower() and not (meses and ano)) or
                     ('diaria' in selected_variable.lower() and not (dias and meses and ano))):
-                    return (None, html.Div("Por favor, seleccione las fechas correspondientes para obtener su certificación.",
+                    message_sf = "Por favor, seleccione las fechas correspondientes para obtener su certificación."
+                    return (None, html.Div(message_sf,
                                            style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
-                            None, None)
+                            None, None, message_sf)
 
                 descrip_solicit = construir_descripsolicit(selected_variable)
                 # Llamar las funciones de RequestGP.py
@@ -252,12 +256,14 @@ def register_callbacks(app,data):
                     pdf_path = convertir_a_pdf(nombre_archivo_final)
                     print(f'El path es {pdf_path}')
                     if pdf_path is None:
-                        return (resultado_gp, html.Div(f"No se pudo generar el archivo PDF",
+                        message_sp = "No se pudo generar el archivo PDF"
+                        return (resultado_gp, html.Div(message_sp,
                                                        style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 16}),
-                                "Archivo PDF no generado", None)
-                    return (resultado_gp,html.Div("Respuesta generada para punto de interés sin estaciones cercanas representativas.",
+                                "Archivo PDF no generado", None, message_sp)
+                    message_ser = "Respuesta generada para punto de interés sin estaciones cercanas representativas."
+                    return (resultado_gp,html.Div(message_ser,
                                                   style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 16}),
-                            "Certificación tipo oficio lamento sin estaciones cercanas", pdf_path)
+                            "Certificación tipo oficio lamento sin estaciones cercanas", pdf_path, message_ser)
                 
                 elif resultado_gp["status"] == "OK":
                     cod_estacion = resultado_gp["message"]
@@ -294,12 +300,14 @@ def register_callbacks(app,data):
                         pdf_path = convertir_a_pdf(nombre_archivo_final)
                         print(f'El path es {pdf_path}')
                         if pdf_path is None:
-                            return (resultado_gp, html.Div(f"No se pudo generar el archivo PDF",
+                            message_sp = "No se pudo generar el archivo PDF"
+                            return (resultado_gp, html.Div(message_sp,
                                                         style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 16}),
-                                    "Archivo PDF no generado", None)
-                        return (resultado_gp,html.Div("Respuesta generada para punto de interés con estación representativa sin datos disponibles para las fechas seleccionadas.",
+                                    "Archivo PDF no generado", None, message_sp)
+                        message_dnd = "Respuesta generada para punto de interés con estación representativa sin datos disponibles para las fechas seleccionadas."
+                        return (resultado_gp,html.Div(message_dnd,
                                                     style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 16}),
-                                "Certificación tipo oficio lamento sin datos", pdf_path)
+                                "Certificación tipo oficio lamento sin datos", pdf_path, message_dnd)
 
                     doc, nombre_plantilla = select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, correo, dias, meses, ano, estacion_seleccionada, descrip_solicit)
                     doc = insert_table_in_doc(doc, stationdf_fnl, selected_variable)
@@ -310,93 +318,184 @@ def register_callbacks(app,data):
                     pdf_path = convertir_a_pdf(nombre_archivo_final)
                     print(f'El path es {pdf_path}')
                     if pdf_path is None:
-                        return (resultado_gp, html.Div(f"No se pudo generar el archivo PDF",
+                        message_sp = "No se pudo generar el archivo PDF"
+                        return (resultado_gp, html.Div(message_sp,
                                                        style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 16}),
-                                "Archivo PDF no generado", None)
-                    
-                    return (resultado_gp,html.Div("Se generó la certificación.", style={'font-family': 'Arial', 'font-style': 'italic',
+                                "Archivo PDF no generado", None, message_sp)
+                    message_cg = "Se generó la certificación."
+                    return (resultado_gp,html.Div(message_cg, style={'font-family': 'Arial', 'font-style': 'italic',
                                                                                         'color': 'green', 'font-size': 16}),
-                            "Certificación generada", pdf_path)
+                            "Certificación generada", pdf_path, message_cg)
     
                 elif resultado_gp["status"] == "ERROR":
                     mensaje_error = resultado_gp["message"]
-                    return (resultado_gp, html.Div(f"No se pudo procesar la solicitud,{mensaje_error}",
+                    message_e = f"No se pudo procesar la solicitud,{mensaje_error}"
+                    return (resultado_gp, html.Div(message_e,
                                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
-                            mensaje_error, None)
+                            mensaje_error, None, message_e)
                 else:
                     mensaje_faltante = resultado_gp["message"]
-                    return (resultado_gp, html.Div(f"No se pudo procesar la solicitud,{mensaje_faltante}", 
+                    message_f = f"No se pudo procesar la solicitud,{mensaje_faltante}"
+                    return (resultado_gp, html.Div(message_f, 
                                                    style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
-                            mensaje_faltante, None)
+                            mensaje_faltante, None, message_f)
                 
             except Exception as e:
                 error_traceback = traceback.format_exc()
-                return (None, html.Div([html.Div(f"Intente más tarde, se produjo un error al generar la certificación: {e}",
+                message_et = f"Intente más tarde, se produjo un error al generar la certificación: {e}"
+                return (None, html.Div([html.Div(message_et,
                                           style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'red', 'font-size': 16}),
                                  html.Pre(error_traceback,
                                           style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})]),
-                        None, None)
-        return (None, html.Div("Haga click en el botón de 'Analizar...' para generar la certificación:", 
-                               style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 16}),
-                None, None)
+                        None, None, message_et)
+        message_click = html.Div("Haga click en el botón de 'Analizar...' para generar la certificación:", 
+                               style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 16})
+        return (None, message_click,
+                None, None, message_click)
+    
 
     @app.callback(
         Output("esperar-dialog", "displayed"),
-        Input("represanalis-button", "n_clicks"),
-        State("output-state", "children")
+        [Input("represanalis-button", "n_clicks"), Input("message-store", "data")]
     )
-    def prompt_dialog(n_clicks, output_state_content):
-        print("n_clicks:", n_clicks)
-        print("output_state_content:", output_state_content)
-        n_clicks = n_clicks or 0
-        # Extraer el mensaje de output_state_content
-        if output_state_content is not None:
-            message = output_state_content.get("props", {}).get("children", "")
-            print(f"n_clicks: {n_clicks}, message: {message}")
-
-            invalidstates = ["Haga click en el botón de 'Analizar...' para generar la certificación:",
-                             "Por favor, diligencie completamente el formulario para obtener su certificación."]
-            # Lógica para mostrar el cuadro de diálogo
-            dialog_displayed = n_clicks > 0 and message not in invalidstates 
-            print(f"Estado del diálogo (mostrar): {dialog_displayed}")
-        
-            return dialog_displayed
+    def handle_dialog(n_clicks, message):
+        # Se extrae solamente el mensaje
+        if isinstance(message, dict) and "props" in message:
+                message_only = message["props"].get("children", "")
         else:
-            return None
+                message_only = message  # Si el mensaje es un string, usarlo directamente
+
+        # Validar que n_clicks sea un número entero y mayor que 0
+        print(f'n_clicks: {n_clicks}, message: {message_only}')
+        
+        # Se enuncian los posibles mensajes y su tipo
+        valid_message = "Haga click en el botón de 'Analizar...' para generar la certificación:"
+        invalid_messeges = [
+            "Por favor, diligencie completamente el formulario para obtener su certificación.",
+            "No se pudo procesar la solicitud,Job failed."
+        ]
+
+        # Se hacen las validaciones de cada mensaje
+        if n_clicks is not None and message_only == valid_message:
+            return True
+        elif n_clicks is not None and message_only in invalid_messeges:
+            # Extraer el contenido del mensaje
+            return False
+        elif n_clicks is not None and message_only not in invalid_messeges:
+            return True
         
     @app.callback(
         Output("descargar-button", "disabled"),
-        Input("represanalis-button", "n_clicks"),
-        State("output-state", "children")
+        [Input("message-store", "data"), Input("represanalis-button", "n_clicks")]
     )
-    def update_button(n_clicks, output_state_content):
-        print("n_clicks:", n_clicks)
-        print("output_state_content:", output_state_content)
-        n_clicks = n_clicks or 0
-        # Extraer el mensaje de output_state_content
-        if output_state_content is not None:
-            message = output_state_content.get("props", {}).get("children", "")
-            print(f"n_clicks: {n_clicks}, message: {message}")
-
-            # Lógica para habilitar el botón de descarga
-            button_disabled = message not in [
-                "Se generó la certificación.", 
-                "Respuesta generada para punto de interés con estación representativa sin datos disponibles para las fechas seleccionadas.",
-                "Respuesta generada para punto de interés sin estaciones cercanas representativas."
-            ]
-            print(f"Estado del botón de descarga (deshabilitado): {button_disabled}")
-
-            return not button_disabled
+    def update_button(message, n_clicks):
+        # Caso 1: Si el mensaje es un diccionario con la clave 'props'
+        if isinstance(message, dict) and "props" in message:
+            message_only = message["props"].get("children", "")
         else:
-            return None
+            # Caso 2: Si el mensaje es directamente un string
+            message_only = message
+        #message_only = message["props"]["children"]#.get("props", {}).get("children", "")   
+        #print(f"n_clicks: {n_clicks}, message: {message_only}")
+        if not message_only or n_clicks is None:
+            return True  # No mostrar el diálogo si no hay mensaje o clics
+
+        print(f"n_clicks: {n_clicks}, message: {message}")
+        # Definir los mensajes válidos
+        valid_states = [
+            "Se generó la certificación.",
+            "Respuesta generada para punto de interés con estación representativa sin datos disponibles para las fechas seleccionadas.",
+            "Respuesta generada para punto de interés sin estaciones cercanas representativas."
+        ]
+
+        return message_only not in valid_states
+    
+    #-----Más funcionales hasta el momento
+    # @app.callback(
+    #     Output("esperar-dialog", "displayed"),
+    #     Input("represanalis-button", "n_clicks"),
+    #     State("output-state", "children")
+    # )
+    # def prompt_dialog(n_clicks, output_state_content):
+    #     print("n_clicks:", n_clicks)
+    #     print("output_state_content:", output_state_content)
+    #     n_clicks = n_clicks or 0
+    #     # Extraer el mensaje de output_state_content
+    #     if output_state_content is not None:
+    #         message = output_state_content.get("props", {}).get("children", "")
+    #         print(f"n_clicks: {n_clicks}, message: {message}")
+
+    #         invalidstates = ["Haga click en el botón de 'Analizar...' para generar la certificación:",
+    #                          "Por favor, diligencie completamente el formulario para obtener su certificación."]
+    #         # Lógica para mostrar el cuadro de diálogo
+    #         dialog_displayed = message not in invalidstates 
+    #         print(f"Estado del diálogo (mostrar): {dialog_displayed}")
+        
+    #         return dialog_displayed
+    #     else:
+    #         return None
+
+    # @app.callback(
+    #     Output("descargar-button", "disabled"),
+    #     Input("represanalis-button", "n_clicks"),
+    #     State("output-state", "children")
+    # )
+    # def update_button(n_clicks, output_state_content):   
+    #     print("n_clicks:", n_clicks)
+    #     print("output_state_content:", output_state_content)
+    #     #n_clicks = n_clicks or 0
+    #     # Extraer el mensaje de output_state_content
+    #     if output_state_content is not None:
+    #         message = output_state_content.get("props", {}).get("children", "")
+    #         print(f"n_clicks: {n_clicks}, message: {message}")
+
+    #         # Definir los mensajes válidos
+    #         valid_states = [
+    #             "Se generó la certificación.",
+    #             "Respuesta generada para punto de interés con estación representativa sin datos disponibles para las fechas seleccionadas.",
+    #             "Respuesta generada para punto de interés sin estaciones cercanas representativas."
+    #         ]
+    #         # Lógica para mostrar el cuadro de diálogo
+    #         #button_disabled = n_clicks > 0 and message not in valid_states 
+    #         button_disabled = message in valid_states
+    #         print(f"Estado del diálogo (mostrar): {button_disabled}")
+        
+    #         return not button_disabled
+    #     else:
+    #         return True
+    #------Final de más funcionales hasta el momento
+
+    # @app.callback(
+    #     Output("descargar-button", "disabled"),
+    #     Input("represanalis-button", "n_clicks"),
+    #     State("output-state", "children")
+    # )
+    # def update_button(n_clicks, output_state_content):
+    #     print("n_clicks:", n_clicks)
+    #     print("output_state_content:", output_state_content)
+    #     n_clicks = n_clicks or 0
+    #     # Extraer el mensaje de output_state_content
+    #     if output_state_content is not None:
+    #         message = output_state_content.get("props", {}).get("children", "")
+    #         print(f"n_clicks: {n_clicks}, message: {message}")
+
+    #         valid_states = [
+    #             "Se generó la certificación.", 
+    #             "Respuesta generada para punto de interés con estación representativa sin datos disponibles para las fechas seleccionadas.",
+    #             "Respuesta generada para punto de interés sin estaciones cercanas representativas."
+    #         ]
+    #         # Lógica para habilitar el botón de descarga
+    #         button_disabled = message not in valid_states
+    #         print(f"Estado del botón de descarga (deshabilitado): {button_disabled}")
+
+    #         return not button_disabled
+    #     else:
+    #         return None
 
     @app.callback(
         [Output("saved-information", "children"),
          Output("download-certif", "data")],
         Input("descargar-button", "n_clicks"),
-        # [Input("descargar-button", "n_clicks"),
-        #  Input("gp-result-store", "data"),
-        #  Input("certtyc-result-store", "data")],
         [State("gp-result-store", "data"),
          State("certtyc-result-store", "data"),
          State("pdf_data", "data"),
