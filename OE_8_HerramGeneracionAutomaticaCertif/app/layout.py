@@ -73,8 +73,8 @@ def create_layout(app, data):
                         hacer click en el mapa más adelante.",
                         style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px',
                                'font-size': 11}),
-                html.P(["Se genera una certificación por variable y periodo, si requiere más, recargue la página luego de terminar el proceso.\
-                         Por favor, diligiencie todos los campos para obtener su certificación, Son OBLIGATORIOS. Tenga\
+                html.P(["En esta aplicación, se generará una certificación por variable y periodo, si requiere más, recargue la página luego de terminar el proceso.\
+                         El diligenciamiento de todos los campos ES OBLIGATORIO para obtener el documento. Tenga\
                        en cuenta la ",
                        dcc.Link("política de tratamiento y protección de datos personales.",
                                 href="https://www.ideam.gov.co/sites/default/files/archivos/politica_de_tratamiento_y_proteccion_de_datos_personales_0.pdf",
@@ -246,7 +246,7 @@ def create_layout(app, data):
                 html.P("Por favor, escoja las fechas de interés para su certificación. Si  requiere un rango,\
                         seleccione solo los días/meses/años de a la fecha inicial y final. Por ejemplo, si escogió\
                         'Precipitación total diaria' y necesita los datos de todos los días de enero y febrero de 2021,\
-                        elija en 'Día(s)' el número 1 y el número 28, en 'Meses(es)', 'Enero' y 'Febrero' y en 'Año(s)', 2021",
+                        elija en 'Día(s)' el número 1 y el número 28, en 'Mes(es)', 'Enero' y 'Febrero' y en 'Año(s)', 2021.",
                     style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                 html.Div([
