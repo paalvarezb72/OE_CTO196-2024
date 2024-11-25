@@ -3,6 +3,7 @@ from dash import html, dcc
 import pandas as pd
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
+from datetime import date, datetime
 from arcgis.gis import GIS
 from arcgis.mapping import WebMap
 from arcgis.features import FeatureLayer
@@ -243,64 +244,122 @@ def create_layout(app, data):
                 # Espaciador
                 html.Div(style={'height': '20px', 'width': '100%'}),
 
-                html.P("Por favor, escoja las fechas de interés para su certificación. Si  requiere un rango,\
-                        seleccione solo los días/meses/años de a la fecha inicial y final. Por ejemplo, si escogió\
-                        'Precipitación total diaria' y necesita los datos de todos los días de enero y febrero de 2021,\
-                        elija en 'Día(s)' el número 1 y el número 28, en 'Mes(es)', 'Enero' y 'Febrero' y en 'Año(s)', 2021.",
-                    style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
+                html.Div([
+                        html.P("Por favor, escoja las fechas inicial y final de interés para su certificación.\
+                               Si necesita desplazarse entre años, utilice el Slider.",
+                               style={'font-family': 'arial', 'text-align': 'justify'}),#, 'margin-bottom': '20px'}),
+                    ], style={'height': '20px', 'width': '100%'}),
+
+                # Espaciador
+                html.Div(style={'height': '15px', 'width': '100%'}),
 
                 html.Div([
                     html.Div([
-                        html.Label("Día(s):", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
-                        dcc.Dropdown(
-                            id="dias-dropdown",
-                            options=[{"label": str(i), "value": i}
-                                    for i in range(1, 32)],
-                            multi=True,
-                            # Ajusta el ancho del dropdown al 100% del contenedor
-                            style={'width': '100%', 'font-family': 'arial'}
+                        html.Label("Fecha inicial:", style={'font-family': 'arial', 'text-align': 'center',
+                                                        'font-weight': 'bold', 'font-size': 13}),
+                        # Año actual
+                        dcc.Slider(
+                            id='inyear-slider',
+                            min=1955,
+                            max=datetime.now().year,
+                            step=1,
+                            value=datetime.now().year,
+                            marks={year: str(year) for year in range(1955, datetime.now().year + 1, 10)},
+                            tooltip={"placement": "bottom", "always_visible": True}
                         ),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '300px'}),  # Ajusta el padding para espacio interno y un min-width
-
+                        dcc.DatePickerSingle(
+                            id='inidate-pckr',
+                            min_date_allowed=date(1955, 1, 1),
+                            max_date_allowed=datetime.now(),
+                            initial_visible_month=datetime.now(),
+                            date=datetime.now(),
+                            style={'width': '100%'}
+                        ),
+                    ], style={'flex':1, 'padding':'0 10px', 'min-width': '200px',
+                              'max-width': '50%','box-sizing': 'border-box'}),#'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}),
                     html.Div([
-                        html.Label("Mes(es):", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
-                        dcc.Dropdown(
-                            id="meses-dropdown",
-                            options=[
-                                {"label": "Enero", "value": "enero"}, {
-                                    "label": "Febrero", "value": "febrero"},
-                                {"label": "Marzo", "value": "marzo"}, {
-                                    "label": "Abril", "value": "abril"},
-                                {"label": "Mayo", "value": "mayo"}, {
-                                    "label": "Junio", "value": "junio"},
-                                {"label": "Julio", "value": "julio"}, {
-                                    "label": "Agosto", "value": "agosto"},
-                                {"label": "Septiembre", "value": "septiembre"}, {
-                                    "label": "Octubre", "value": "octubre"},
-                                {"label": "Noviembre", "value": "noviembre"}, {
-                                    "label": "Diciembre", "value": "diciembre"}
-                            ],
-                            multi=True,
-                            # Igual aquí
-                            style={'width': '100%', 'font-family': 'arial'}
+                        html.Label("Fecha final:", style={'font-family': 'arial', 'text-align': 'center',
+                                                        'font-weight': 'bold', 'font-size': 13}),
+                        dcc.Slider(
+                            id='finyear-slider',
+                            min=1955,
+                            max=datetime.now().year,
+                            step=1,
+                            value=datetime.now().year,
+                            marks={year: str(year) for year in range(1955, datetime.now().year + 1, 10)},
+                            tooltip={"placement": "bottom", "always_visible": True}
                         ),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '300px'}),  # Y aquí
+                        dcc.DatePickerSingle(
+                            id='findate-pckr',
+                            min_date_allowed=date(1995, 8, 5),
+                            max_date_allowed=datetime.now(),
+                            initial_visible_month=datetime.now(),
+                            date=datetime.now(),
+                            style={'width': '100%'}
+                        ),
+                    ], style={'flex':1, 'padding':'0 10px', 'min-width': '200px',
+                              'max-width': '50%','box-sizing': 'border-box'}),
+                    
+                    # html.Div([
+                    #     # Espacio en blanco
+                    # ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px',
+                    #           'max-width': '20%','box-sizing': 'border-box'}),
+                ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap',
+                          'gap': '10px','width': '100%'} ),
+                
 
-                    html.Div([
-                        html.Label("Año(s):", style={
-                                'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
-                        dcc.Dropdown(
-                            id="ano-dropdown",
-                            options=[{"label": str(i), "value": i}
-                                    for i in range(2024, 1949, -1)],
-                            multi=True,
-                            # Y finalmente aquí
-                            style={'width': '100%', 'font-family': 'arial'}
-                        ),
-                    ], style={'flex': 1, 'padding': '0 10px', 'min-width': '300px'})
-                ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}), 
+                # html.Div([
+                #     html.Div([
+                #         html.Label("Día(s):", style={
+                #                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
+                #         dcc.Dropdown(
+                #             id="dias-dropdown",
+                #             options=[{"label": str(i), "value": i}
+                #                     for i in range(1, 32)],
+                #             multi=True,
+                #             # Ajusta el ancho del dropdown al 100% del contenedor
+                #             style={'width': '100%', 'font-family': 'arial'}
+                #         ),
+                #     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '300px'}),  # Ajusta el padding para espacio interno y un min-width
+
+                #     html.Div([
+                #         html.Label("Mes(es):", style={
+                #                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
+                #         dcc.Dropdown(
+                #             id="meses-dropdown",
+                #             options=[
+                #                 {"label": "Enero", "value": "enero"}, {
+                #                     "label": "Febrero", "value": "febrero"},
+                #                 {"label": "Marzo", "value": "marzo"}, {
+                #                     "label": "Abril", "value": "abril"},
+                #                 {"label": "Mayo", "value": "mayo"}, {
+                #                     "label": "Junio", "value": "junio"},
+                #                 {"label": "Julio", "value": "julio"}, {
+                #                     "label": "Agosto", "value": "agosto"},
+                #                 {"label": "Septiembre", "value": "septiembre"}, {
+                #                     "label": "Octubre", "value": "octubre"},
+                #                 {"label": "Noviembre", "value": "noviembre"}, {
+                #                     "label": "Diciembre", "value": "diciembre"}
+                #             ],
+                #             multi=True,
+                #             # Igual aquí
+                #             style={'width': '100%', 'font-family': 'arial'}
+                #         ),
+                #     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '300px'}),  # Y aquí
+
+                #     html.Div([
+                #         html.Label("Año(s):", style={
+                #                 'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
+                #         dcc.Dropdown(
+                #             id="ano-dropdown",
+                #             options=[{"label": str(i), "value": i}
+                #                     for i in range(2024, 1949, -1)],
+                #             multi=True,
+                #             # Y finalmente aquí
+                #             style={'width': '100%', 'font-family': 'arial'}
+                #         ),
+                #     ], style={'flex': 1, 'padding': '0 10px', 'min-width': '300px'})
+                # ], style={'display': 'flex', 'justify-content': 'space-between', 'flex-wrap': 'wrap'}), 
 
                 # Espaciador
                 html.Div(style={'height': '30px', 'width': '100%'}),

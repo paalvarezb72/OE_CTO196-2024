@@ -1,4 +1,5 @@
 # docs/replace_data.py
+from datetime import datetime
 from docx.shared import Pt
 
 def reemplazar_datos_en_runs(paragraph, search_text, replace_text):
@@ -28,14 +29,39 @@ def reemplazar_datos_noEMC(doc, nombres, apellidos, correo, descrip_solicit, cli
             reemplazar_datos_en_runs(p, key, value)
     return doc
 
-def reemplazar_datos_nan(doc, nombres, apellidos, correo, dias, meses, ano, selected_variable, estacion_seleccionada, descrip_solicit):
+def reemplazar_datos_nan(doc, nombres, apellidos, correo, finicio, ffin, selected_variable, estacion_seleccionada, descrip_solicit):
+    if not finicio or not ffin:
+        return "Selecciona ambas fechas."
+    
+    # Convertir las fechas en objetos datetime
+    fecha_inicio = datetime.fromisoformat(finicio)
+    fecha_fin = datetime.fromisoformat(ffin)
+
+    # Determinar si las fechas están en el mismo mes y año
+    mismo_mes = fecha_inicio.month == fecha_fin.month
+    mismo_ano = fecha_inicio.year == fecha_fin.year
+
+    # Generar textos dinámicos para los días, meses y años
+    if mismo_mes and mismo_ano:
+        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
+        meses = fecha_inicio.strftime('%B')  # Nombre del mes (sin repetir)
+        anos = str(fecha_inicio.year)        # Año único
+    elif mismo_ano:
+        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
+        meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')}"
+        anos = str(fecha_inicio.year)
+    else:
+        dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+        meses = ""  # No es necesario cuando se incluye la fecha completa
+        anos = ""   # No es necesario cuando se incluye la fecha completa
+    
     datos = {
         "{{NOMBRES}}": nombres.upper(),
         "{{APELLIDOS}}": apellidos.upper(),
         "{{CORREO}}": correo,
-        "{{DIAS}}": ", ".join(map(str, dias)),
-        "{{MESES}}": ", ".join(meses),
-        "{{AÑO}}": ", ".join(map(str, ano)),
+        "{{DIAS}}": dias,
+        "{{MESES}}": meses,
+        "{{AÑO}}": anos,
         "{{VARIABLE}}": selected_variable,
         "{{ESTACION}}": estacion_seleccionada['nombre'],
         "{{DESCRIP_SOLICIT}}": descrip_solicit
@@ -45,13 +71,38 @@ def reemplazar_datos_nan(doc, nombres, apellidos, correo, dias, meses, ano, sele
             reemplazar_datos_en_runs(p, key, value)
     return doc
 
-def reemplazar_datos_precip(doc, nombres, apellidos, dias, meses, ano, selected_variable, estacion_seleccionada, dia, mes_nm, ano_p, primer_valor):
+def reemplazar_datos_precipd(doc, nombres, apellidos, finicio, ffin, selected_variable, estacion_seleccionada, dia, mes_nm, ano_p, primer_valor):
+    if not finicio or not ffin:
+        return "Selecciona ambas fechas."
+    
+    # Convertir las fechas en objetos datetime
+    fecha_inicio = datetime.fromisoformat(finicio)
+    fecha_fin = datetime.fromisoformat(ffin)
+
+    # Determinar si las fechas están en el mismo mes y año
+    mismo_mes = fecha_inicio.month == fecha_fin.month
+    mismo_ano = fecha_inicio.year == fecha_fin.year
+
+    # Generar textos dinámicos para los días, meses y años
+    if mismo_mes and mismo_ano:
+        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
+        meses = fecha_inicio.strftime('%B')  # Nombre del mes (sin repetir)
+        anos = str(fecha_inicio.year)        # Año único
+    elif mismo_ano:
+        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
+        meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')}"
+        anos = str(fecha_inicio.year)
+    else:
+        dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+        meses = ""  # No es necesario cuando se incluye la fecha completa
+        anos = ""   # No es necesario cuando se incluye la fecha completa
+    
     datos = {
         "{{NOMBRES}}": nombres.upper(),
         "{{APELLIDOS}}": apellidos.upper(),
-        "{{DIAS}}": ", ".join(map(str, dias)),
-        "{{MESES}}": ", ".join(meses),
-        "{{AÑO}}": ", ".join(map(str, ano)),
+        "{{DIAS}}": dias,
+        "{{MESES}}": meses,
+        "{{AÑO}}": anos,
         "{{VARIABLE}}": selected_variable,
         "{{ESTACION}}": estacion_seleccionada['nombre'],
         "{{LATITUD}}": str(estacion_seleccionada['latitud']),
@@ -72,13 +123,38 @@ def reemplazar_datos_precip(doc, nombres, apellidos, dias, meses, ano, selected_
 
     return doc
 
-def reemplazar_datos(doc, nombres, apellidos, dias, meses, ano, selected_variable, estacion_seleccionada):
+def reemplazar_datos(doc, nombres, apellidos, finicio, ffin, selected_variable, estacion_seleccionada):
+    if not finicio or not ffin:
+        return "Selecciona ambas fechas."
+    
+    # Convertir las fechas en objetos datetime
+    fecha_inicio = datetime.fromisoformat(finicio)
+    fecha_fin = datetime.fromisoformat(ffin)
+
+    # Determinar si las fechas están en el mismo mes y año
+    mismo_mes = fecha_inicio.month == fecha_fin.month
+    mismo_ano = fecha_inicio.year == fecha_fin.year
+
+    # Generar textos dinámicos para los días, meses y años
+    if mismo_mes and mismo_ano:
+        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
+        meses = fecha_inicio.strftime('%B')  # Nombre del mes (sin repetir)
+        anos = str(fecha_inicio.year)        # Año único
+    elif mismo_ano:
+        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
+        meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')}"
+        anos = str(fecha_inicio.year)
+    else:
+        dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+        meses = ""  # No es necesario cuando se incluye la fecha completa
+        anos = ""   # No es necesario cuando se incluye la fecha completa
+    
     datos = {
         "{{NOMBRES}}": nombres.upper(),
         "{{APELLIDOS}}": apellidos.upper(),
-        "{{DIAS}}": ", ".join(map(str, dias)) if dias else "",  # Manejar caso donde dias es None
-        "{{MESES}}": ", ".join(meses) if meses else "",  # Manejar caso donde meses es None
-        "{{AÑO}}": ", ".join(map(str, ano)), #if ano else "",  # Manejar caso donde ano es None
+        "{{DIAS}}": dias,  # Manejar caso donde dias es None
+        "{{MESES}}": meses,  # Manejar caso donde meses es None
+        "{{AÑO}}": anos, #if ano else "",  # Manejar caso donde ano es None
         "{{VARIABLE}}": selected_variable,
         "{{ESTACION}}": estacion_seleccionada['nombre'],
         "{{LATITUD}}": str(estacion_seleccionada['latitud']),

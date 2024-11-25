@@ -5,7 +5,7 @@ import os
 import traceback
 import sys
 from dash import html, dcc
-from datetime import datetime
+from datetime import date, datetime
 from dash.dependencies import Input, Output, State
 from docs.generate_docs import *
 from docs.convert_a_pdf import convertir_a_pdf
@@ -108,21 +108,21 @@ def register_callbacks(app,data):
             ginteres_input_disabled
         ]
     
-    @app.callback(
-        [Output('dias-dropdown', 'disabled'),
-         Output('meses-dropdown', 'disabled'),
-         Output('ano-dropdown', 'disabled')],
-        [Input('tiposerie-dp', 'value')]
-    )
-    def update_date_dropdowns(selected_period):
-        if selected_period:
-            if 'anual' in selected_period.lower():
-                return True, True, False
-            elif 'mensual' in selected_period.lower():
-                return True, False, False
-            elif 'diaria' in selected_period.lower():
-                return False, False, False
-        return False, False, False
+    # @app.callback(
+    #     [Output('dias-dropdown', 'disabled'),
+    #      Output('meses-dropdown', 'disabled'),
+    #      Output('ano-dropdown', 'disabled')],
+    #     [Input('tiposerie-dp', 'value')]
+    # )
+    # def update_date_dropdowns(selected_period):
+    #     if selected_period:
+    #         if 'anual' in selected_period.lower():
+    #             return True, True, False
+    #         elif 'mensual' in selected_period.lower():
+    #             return True, False, False
+    #         elif 'diaria' in selected_period.lower():
+    #             return False, False, False
+    #     return False, False, False
 
     @app.callback(
         Output("tiposerie-dp", "options"),
@@ -172,7 +172,78 @@ def register_callbacks(app,data):
         "Sin Datos": "PlantillaOficioLamentoSinDatos.docx",
         "Sin Estación": "PlantillaOficioLamentoSinEstaciones.docx"
     }
-   
+
+    # Callback que sincroniza los rangos permitidos entre fecha inicial y fecha final
+    @app.callback(
+        Output('inidate-pckr', 'max_date_allowed'),
+        Output('findate-pckr', 'min_date_allowed'),
+        Input('inidate-pckr', 'date'),
+        Input('findate-pckr', 'date')
+    )
+    def actualizar_rango_fechas(fecha_inicio, fecha_fin):
+        """
+        Sincroniza los rangos permitidos entre fecha inicial y fecha final.
+        """
+        # Verificar y procesar fechas
+        if fecha_inicio:
+            fecha_inicio = datetime.strptime(fecha_inicio.split('T')[0], '%Y-%m-%d').date()
+            #fecha_inicio = parse_fecha(fecha_inicio)
+        else:
+            fecha_inicio = date(1955, 1, 1)
+        
+        if fecha_fin:
+            #fecha_fin = parse_fecha(fecha_fin)
+            fecha_fin = datetime.strptime(fecha_fin.split('T')[0], '%Y-%m-%d').date()
+        else:
+            fecha_fin = datetime.now().date()
+
+        # Actualizar restricciones
+        max_fecha_inicio = fecha_fin  # La fecha inicial no puede ser después de la fecha final
+        min_fecha_fin = fecha_inicio  # La fecha final no puede ser antes de la fecha inicial
+
+        return max_fecha_inicio, min_fecha_fin
+
+    # Callback para actualizar el calendario según el año del slider
+    @app.callback(
+        Output('inidate-pckr', 'date'),
+        Input('inyear-slider', 'value'),
+        State('inidate-pckr', 'date')
+    )
+    def update_date(year, current_date):
+        """
+        Actualiza la fecha visible del DatePickerSingle al año seleccionado en el slider,
+        manteniendo el mismo mes y día.
+        """
+        # Convertir la fecha actual en un objeto datetime
+        current_date_obj = parse_fecha(current_date).date()
+        
+        # Crear una nueva fecha con el año del slider
+        new_date = current_date_obj.replace(year=year)
+        
+        # Retornar la nueva fecha como cadena en formato ISO
+        return new_date.strftime('%Y-%m-%d')# %H:%M:%S.%f')
+    
+
+    # Callback para actualizar el calendario final según el año del slider
+    @app.callback(
+        Output('findate-pckr', 'date'),
+        Input('finyear-slider', 'value'),
+        State('findate-pckr', 'date')
+    )
+    def update_date(year, current_date):
+        """
+        Actualiza la fecha visible del DatePickerSingle al año seleccionado en el slider,
+        manteniendo el mismo mes y día.
+        """
+        # Convertir la fecha actual en un objeto datetime
+        current_date_obj = parse_fecha(current_date).date()
+        
+        # Crear una nueva fecha con el año del slider
+        new_date = current_date_obj.replace(year=year)
+        
+        # Retornar la nueva fecha como cadena en formato ISO
+        return new_date.strftime('%Y-%m-%d')# %H:%M:%S.%f')
+
     @app.callback(
         [Output("gp-result-store", "data"), #Output("output-represanalis", "children"),
          Output("output-state", "children"),
@@ -193,9 +264,8 @@ def register_callbacks(app,data):
          State("ginteres-dp", "value"),
          State("correo-input", "value"),
          State("tel-input", "value"),
-         State("dias-dropdown", "value"),
-         State("meses-dropdown", "value"),
-         State("ano-dropdown", "value"),
+         State("inidate-pckr", "date"),
+         State("findate-pckr", "date"),
          State("variable-dp", "value"),
          State("tiposerie-dp", "value"),
          State("upload-data", "filename"),
@@ -203,7 +273,7 @@ def register_callbacks(app,data):
     )
 
     def generar_certificado(n_clicks, itemid_file, tpers, tdoc, ndoc, nombres, apellidos, gendp, getndp, infpob, discdp, gintdp,
-                            correo, tel, dias, meses, ano, selected_var, selected_variable, upld, clickinfo):#, estacion_nombre, sin_estacion, lat, lon):
+                            correo, tel, fecha_inicio, fecha_fin, selected_var, selected_variable, upld, clickinfo):#, estacion_nombre, sin_estacion, lat, lon):
         if n_clicks is not None:
             try:
                 # Verificar que los campos obligatorios siempre estén llenos
@@ -221,14 +291,14 @@ def register_callbacks(app,data):
                                             style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
                                 None, None, message_sdpn)
 
-                # Validar fechas según la periodicidad seleccionada
-                if (('anual' in selected_variable.lower() and not ano) or
-                    ('mensual' in selected_variable.lower() and not (meses and ano)) or
-                    ('diaria' in selected_variable.lower() and not (dias and meses and ano))):
-                    message_sf = "Por favor, seleccione las fechas correspondientes para obtener su certificación."
-                    return (None, html.Div(message_sf,
-                                           style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
-                            None, None, message_sf)
+                # # Validar fechas según la periodicidad seleccionada
+                # if (('anual' in selected_variable.lower() and not ano) or
+                #     ('mensual' in selected_variable.lower() and not (meses and ano)) or
+                #     ('diaria' in selected_variable.lower() and not (dias and meses and ano))):
+                #     message_sf = "Por favor, seleccione las fechas correspondientes para obtener su certificación."
+                #     return (None, html.Div(message_sf,
+                #                            style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
+                #             None, None, message_sf)
 
                 descrip_solicit = construir_descripsolicit(selected_variable)
                 # Llamar las funciones de RequestGP.py
@@ -268,7 +338,9 @@ def register_callbacks(app,data):
                 elif resultado_gp["status"] == "OK":
                     cod_estacion = resultado_gp["message"]
                     estacion_seleccionada = data[data['CODIGO'] == cod_estacion].iloc[0]
-                    inicio, fin = construir_rango_fechas(dias, meses, ano)
+                    inicio, fin = construir_rango_fechas(fecha_inicio, fecha_fin)
+                    print(inicio)
+                    print(fin)
                     sensor = obtener_sensor(selected_variable)
                     codestacion = construir_codestacion(estacion_seleccionada)
 
@@ -291,8 +363,8 @@ def register_callbacks(app,data):
                     
                     print(stationdf_fnl)
                     # Resultado si no hay datos
-                    if stationdf_fnl.empty:
-                        doc = create_certificate_nodata(nombres, apellidos, correo, dias, meses, ano, selected_variable, 
+                    if stationdf_fnl.empty or stationdf_fnl['Valor'].isna().all():
+                        doc = create_certificate_nodata(nombres, apellidos, correo, fecha_inicio, fecha_fin, selected_variable, 
                                                             estacion_seleccionada, descrip_solicit)
                         date_rnow_str = datetime.now().strftime("%Y%m%d_%H%M%S")
                         nombre_archivo_final = f"{date_rnow_str}_{plantillas_por_variable['Sin Datos']}"
@@ -309,7 +381,7 @@ def register_callbacks(app,data):
                                                     style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 16}),
                                 "Certificación tipo oficio lamento sin datos", pdf_path, message_dnd)
 
-                    doc, nombre_plantilla = select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, correo, dias, meses, ano, estacion_seleccionada, descrip_solicit)
+                    doc, nombre_plantilla = select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, correo, fecha_inicio, fecha_fin, estacion_seleccionada, descrip_solicit)
                     doc = insert_table_in_doc(doc, stationdf_fnl, selected_variable)
 
                     date_rnow_str = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -492,136 +564,136 @@ def register_callbacks(app,data):
     #     else:
     #         return None
 
-    @app.callback(
-        [Output("saved-information", "children"),
-         Output("download-certif", "data")],
-        Input("descargar-button", "n_clicks"),
-        [State("gp-result-store", "data"),
-         State("certtyc-result-store", "data"),
-         State("pdf_data", "data"),
-         State("tpersona-ri","value"),
-         State("tdoc-dp", "value"),
-         State("ndoc-input", "value"),
-         State("nombres-input", "value"),
-         State("apellidos-input", "value"),
-         State("correo-input", "value"),
-         State("tel-input", "value"),
-         State("genero-dp", "value"),
-         State("genero-input", "value"),
-         State("grupetn-dp", "value"),
-         State("grupetn-input", "value"),
-         State("infpoblac-dp", "value"),
-         State("discap-dp", "value"),
-         State("discap-input", "value"),
-         State("ginteres-dp", "value"),
-         State("ginteres-input", "value"),
-         State("variable-dp", "value"),
-         State("tiposerie-dp", "value"),
-         State("dias-dropdown", "value"),
-         State("meses-dropdown", "value"),
-         State("ano-dropdown", "value"),
-         State("upload-data", "filename"),
-         State("click-info", "children")],
-         prevent_initial_call=True
-    )
-    def guardresults_regsolicit_tb(n_clicks,gpresult,outstate,pdf_path,tpers,tdoc, ndoc, nombres, apell,
-                                   corr, tel, gendp, genin, getndp, getnin, infpob, discdp,
-                                   discin, gintdp, gintin, vardp, tipsrdp, dia, mes, ano, upld, clickinfo):
-        if n_clicks and pdf_path is None:
-            pass
+    # @app.callback(
+    #     [Output("saved-information", "children"),
+    #      Output("download-certif", "data")],
+    #     Input("descargar-button", "n_clicks"),
+    #     [State("gp-result-store", "data"),
+    #      State("certtyc-result-store", "data"),
+    #      State("pdf_data", "data"),
+    #      State("tpersona-ri","value"),
+    #      State("tdoc-dp", "value"),
+    #      State("ndoc-input", "value"),
+    #      State("nombres-input", "value"),
+    #      State("apellidos-input", "value"),
+    #      State("correo-input", "value"),
+    #      State("tel-input", "value"),
+    #      State("genero-dp", "value"),
+    #      State("genero-input", "value"),
+    #      State("grupetn-dp", "value"),
+    #      State("grupetn-input", "value"),
+    #      State("infpoblac-dp", "value"),
+    #      State("discap-dp", "value"),
+    #      State("discap-input", "value"),
+    #      State("ginteres-dp", "value"),
+    #      State("ginteres-input", "value"),
+    #      State("variable-dp", "value"),
+    #      State("tiposerie-dp", "value"),
+    #      State("dias-dropdown", "value"),
+    #      State("meses-dropdown", "value"),
+    #      State("ano-dropdown", "value"),
+    #      State("upload-data", "filename"),
+    #      State("click-info", "children")],
+    #      prevent_initial_call=True
+    # )
+    # def guardresults_regsolicit_tb(n_clicks,gpresult,outstate,pdf_path,tpers,tdoc, ndoc, nombres, apell,
+    #                                corr, tel, gendp, genin, getndp, getnin, infpob, discdp,
+    #                                discin, gintdp, gintin, vardp, tipsrdp, dia, mes, ano, upld, clickinfo):
+    #     if n_clicks and pdf_path is None:
+    #         pass
         
-        update_table = UpdateTable()
+    #     update_table = UpdateTable()
 
-        if isinstance(gpresult, dict):
-            resultado_status = gpresult.get('status', 'Estado no disponible')
-            resultado_message = gpresult.get('message', 'Mensaje no disponible')
-        else:
-            print(f"gpresult no es un diccionario: {gpresult}")
-            resultado_status = "Estado no disponible"
-            resultado_message = "Mensaje no disponible"
+    #     if isinstance(gpresult, dict):
+    #         resultado_status = gpresult.get('status', 'Estado no disponible')
+    #         resultado_message = gpresult.get('message', 'Mensaje no disponible')
+    #     else:
+    #         print(f"gpresult no es un diccionario: {gpresult}")
+    #         resultado_status = "Estado no disponible"
+    #         resultado_message = "Mensaje no disponible"
 
-        if isinstance(outstate, str):
-            outstate_str = outstate
-        else:
-            print(f"outstate no es una cadena: {outstate}")
-            outstate_str = "Estado no disponible"
+    #     if isinstance(outstate, str):
+    #         outstate_str = outstate
+    #     else:
+    #         print(f"outstate no es una cadena: {outstate}")
+    #         outstate_str = "Estado no disponible"
 
-        try:
-            # Operador ternario para asignaciones más limpias
-            gendp = gendp if gendp else genin
-            getndp = getndp if getndp else getnin
-            discdp = discdp if discdp else discin
-            gintdp = gintdp if gintdp else gintin
+    #     try:
+    #         # Operador ternario para asignaciones más limpias
+    #         gendp = gendp if gendp else genin
+    #         getndp = getndp if getndp else getnin
+    #         discdp = discdp if discdp else discin
+    #         gintdp = gintdp if gintdp else gintin
 
-            if upld is None:
-                coord = clickinfo
-                x = coord[1]
-                y = coord[0]
-                coord_s = (coord[0],coord[1])
-                coord_str = str(coord_s)
-                print(coord)
-            else:
-                print(upld)
-                coordenadas = update_table.obtener_coordenadas_zip(os.path.join(UPLOAD_DIRECTORY, upld))
-                extract_coords = (coordenadas[0][1],coordenadas[0][0])
-                coord_str = str(extract_coords)
-                x = coordenadas[0][0]
-                y = coordenadas[0][1]
+    #         if upld is None:
+    #             coord = clickinfo
+    #             x = coord[1]
+    #             y = coord[0]
+    #             coord_s = (coord[0],coord[1])
+    #             coord_str = str(coord_s)
+    #             print(coord)
+    #         else:
+    #             print(upld)
+    #             coordenadas = update_table.obtener_coordenadas_zip(os.path.join(UPLOAD_DIRECTORY, upld))
+    #             extract_coords = (coordenadas[0][1],coordenadas[0][0])
+    #             coord_str = str(extract_coords)
+    #             x = coordenadas[0][0]
+    #             y = coordenadas[0][1]
 
-            # Fecha y hora actuales en la zona horaria local ## Es correspondiente y no es necesario
-            # cambiar la Timezone
-            date_now = datetime.now()
+    #         # Fecha y hora actuales en la zona horaria local ## Es correspondiente y no es necesario
+    #         # cambiar la Timezone
+    #         date_now = datetime.now()
 
-            data_list = [
-                {
-                    "tpersona_ri": tpers,
-                    "tdoc_dp": tdoc,
-                    "ndoc_input": ndoc,
-                    "nombres_input": nombres,
-                    "apellidos_in": apell,
-                    "correo_input": corr,
-                    "tel_input": tel,
-                    "genero_dp": gendp,
-                    "genero_input": gendp,
-                    "grupetn_dp": getndp,
-                    "grupetn_input": getndp,
-                    "infpoblac_dp": infpob,
-                    "discap_dp": discdp,
-                    "discap_input": discdp,
-                    "ginteres_dp": gintdp,
-                    "ginteres_input": gintdp,
-                    "variable_dp": vardp,
-                    "tiposerie_dp": tipsrdp,
-                    "dias_dropdown": dia,
-                    "meses_dropdown": mes,
-                    "ano_dropdown": ano,
-                    "upload_zip_click_info": coord_str,
-                    "resultado_status_": resultado_status,
-                    "resultado_message_": resultado_message,
-                    "output_state": outstate_str,
-                    "date_displ": date_now,
-                    "geometry": {
-                        "x": x,
-                        "y": y,
-                        "spatialReference": {"wkid": 4326}
-                        }
-                }]
+    #         data_list = [
+    #             {
+    #                 "tpersona_ri": tpers,
+    #                 "tdoc_dp": tdoc,
+    #                 "ndoc_input": ndoc,
+    #                 "nombres_input": nombres,
+    #                 "apellidos_in": apell,
+    #                 "correo_input": corr,
+    #                 "tel_input": tel,
+    #                 "genero_dp": gendp,
+    #                 "genero_input": gendp,
+    #                 "grupetn_dp": getndp,
+    #                 "grupetn_input": getndp,
+    #                 "infpoblac_dp": infpob,
+    #                 "discap_dp": discdp,
+    #                 "discap_input": discdp,
+    #                 "ginteres_dp": gintdp,
+    #                 "ginteres_input": gintdp,
+    #                 "variable_dp": vardp,
+    #                 "tiposerie_dp": tipsrdp,
+    #                 "dias_dropdown": dia,
+    #                 "meses_dropdown": mes,
+    #                 "ano_dropdown": ano,
+    #                 "upload_zip_click_info": coord_str,
+    #                 "resultado_status_": resultado_status,
+    #                 "resultado_message_": resultado_message,
+    #                 "output_state": outstate_str,
+    #                 "date_displ": date_now,
+    #                 "geometry": {
+    #                     "x": x,
+    #                     "y": y,
+    #                     "spatialReference": {"wkid": 4326}
+    #                     }
+    #             }]
             
-            result = update_table.actualizar_tabla(data_list)
-            print("Intentando subir los siguientes datos:", data_list)
-            print("Resultado de la actualización de la tabla:", result)
+    #         result = update_table.actualizar_tabla(data_list)
+    #         print("Intentando subir los siguientes datos:", data_list)
+    #         print("Resultado de la actualización de la tabla:", result)
 
-            return ("Datos guardados exitosamente", dcc.send_file(pdf_path))
-        except Exception as e:
-            print(f"Error en el proceso de cargue de datos: {e}")
-            return (None, None)
+    #         return ("Datos guardados exitosamente", dcc.send_file(pdf_path))
+    #     except Exception as e:
+    #         print(f"Error en el proceso de cargue de datos: {e}")
+    #         return (None, None)
         
-    @app.callback(
-        Output('esperarpdf-dialog', 'displayed'),
-        Input('descargar-button', 'n_clicks')
-    )
-    def show_pdf_dialog(n_clicks):
-        if n_clicks:
-            return True  # Muestra el diálogo
-        return False  # No muestra el diálogo
+    # @app.callback(
+    #     Output('esperarpdf-dialog', 'displayed'),
+    #     Input('descargar-button', 'n_clicks')
+    # )
+    # def show_pdf_dialog(n_clicks):
+    #     if n_clicks:
+    #         return True  # Muestra el diálogo
+    #     return False  # No muestra el diálogo
     

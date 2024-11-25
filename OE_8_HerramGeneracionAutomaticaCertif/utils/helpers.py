@@ -24,26 +24,66 @@ def obtener_sensor(selected_variable):
     # Retorna None o un valor por defecto si no se encuentra un prefijo correspondiente
     return None
 
-def construir_rango_fechas(dias, meses, ano):
-    meses_dict = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5, "junio": 6,
-                  "julio": 7, "agosto": 8, "septiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12}
+# def construir_rango_fechas(dias, meses, ano):
+#     meses_dict = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5, "junio": 6,
+#                   "julio": 7, "agosto": 8, "septiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12}
     
-    # Si días es None o vacío, usar 1 por defecto
-    dias = list(map(int, dias)) if dias else [1, 1]
+#     # Si días es None o vacío, usar 1 por defecto
+#     dias = list(map(int, dias)) if dias else [1, 1]
 
-    # Si meses es None o vacío, usar 1 por defecto
-    meses = list(map(lambda mes: meses_dict[mes], meses)) if meses else [1, 12]
+#     # Si meses es None o vacío, usar 1 por defecto
+#     meses = list(map(lambda mes: meses_dict[mes], meses)) if meses else [1, 12]
     
-    # Se verifica que el año esté presente
-    if not ano:
-        raise ValueError("El año es un campo obligatorio")
+#     # Se verifica que el año esté presente
+#     if not ano:
+#         raise ValueError("El año es un campo obligatorio")
 
-    ano = list(map(int, ano))
+#     ano = list(map(int, ano))
 
-    # Construir la fecha de inicio y fin según los valores disponibles
-    fecha_inicio = datetime(ano[0], meses[0], dias[0]).strftime('%Y-%m-%d %H:%M:%S')
-    fecha_fin = datetime(ano[-1], meses[-1], dias[-1]).strftime('%Y-%m-%d %H:%M:%S')
-    return fecha_inicio, fecha_fin
+#     # Construir la fecha de inicio y fin según los valores disponibles
+#     fecha_inicio = datetime(ano[0], meses[0], dias[0]).strftime('%Y-%m-%d %H:%M:%S')
+#     fecha_fin = datetime(ano[-1], meses[-1], dias[-1]).strftime('%Y-%m-%d %H:%M:%S')
+#     return fecha_inicio, fecha_fin
+
+def parse_fecha(fecha):
+    """
+    Intenta interpretar la cadena de fecha usando diferentes formatos.
+    """
+    if not isinstance(fecha, str):
+        raise TypeError(f"Se esperaba una cadena de texto, pero se recibió: {type(fecha)}")
+    if not fecha.strip():
+        raise ValueError("La fecha proporcionada está vacía.")
+
+    formatos = [
+        '%Y-%m-%dT%H:%M:%S.%f',  # ISO con microsegundos
+        '%Y-%m-%dT%H:%M:%S',     # ISO sin microsegundos
+        '%Y-%m-%d %H:%M:%S.%f',  # Sin T pero con microsegundos
+        '%Y-%m-%d'               # Solo fecha
+    ]
+    for formato in formatos:
+        try:
+            return datetime.strptime(fecha, formato)
+        except ValueError:
+            continue
+
+    raise ValueError(f"Formato de fecha no reconocido: {fecha}")
+
+def construir_rango_fechas(fecha_inicio, fecha_fin):
+    """
+    Construye un rango de fechas basado en las entradas de dcc.DatePickerSingle.
+    
+    :param fecha_inicio: Fecha inicial en formato 'YYYY-MM-DD' o None si no se seleccionó.
+    :param fecha_fin: Fecha final en formato 'YYYY-MM-DD' o None si no se seleccionó.
+    :return: Tupla con (fecha_inicio, fecha_fin) en formato 'YYYY-MM-DD HH:MM:SS'.
+    """
+    fecha_inicio_dt = parse_fecha(fecha_inicio)
+    fecha_fin_dt = parse_fecha(fecha_fin)
+
+    # Opcional: Formatear las fechas
+    fecha_inicio_str = fecha_inicio_dt.strftime('%Y-%m-%d %H:%M:%S.%f')
+    fecha_fin_str = fecha_fin_dt.strftime('%Y-%m-%d %H:%M:%S.%f')
+
+    return fecha_inicio_str, fecha_fin_str
 
 def construir_codestacion(estacion_seleccionada):
     # Se construye código estación según se solicita en Cassandra
