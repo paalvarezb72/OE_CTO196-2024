@@ -15,21 +15,31 @@ def reemplazar_datos_en_runs(paragraph, search_text, replace_text):
         else:
             paragraph.add_run(new_text)
 
-def reemplazar_datos_noEMC(doc, nombres, apellidos, correo, descrip_solicit, clickinfo):#, lat_pi, lon_pi):
-    datos = {
-        "{{NOMBRES}}": nombres.upper(),
-        "{{APELLIDOS}}": apellidos.upper(),
-        "{{CORREO}}": correo,
-        "{{DESCRIP_SOLICIT}}": descrip_solicit,
-        "{{LAT_PI}}": str(clickinfo[0]),#str(lat_pi),
-        "{{LONG_PI}}": str(clickinfo[1])#str(lon_pi)
-    }
+def reemplazar_datos_noEMC(tpers, doc, nombres, apellidos, correo, descrip_solicit, clickinfo):#, lat_pi, lon_pi):
+    if tpers == 'Persona jurídica':
+        datos = {
+            "{{NOMBRES}}": nombres.upper(),
+            "{{CORREO}}": correo,
+            "{{DESCRIP_SOLICIT}}": descrip_solicit,
+            "{{LAT_PI}}": str(clickinfo[0]),
+            "{{LONG_PI}}": str(clickinfo[1])
+        }
+    elif tpers == 'Persona natural':
+        datos = {
+            "{{NOMBRES}}": nombres.upper(),
+            "{{APELLIDOS}}": apellidos.upper(),
+            "{{CORREO}}": correo,
+            "{{DESCRIP_SOLICIT}}": descrip_solicit,
+            "{{LAT_PI}}": str(clickinfo[0]),
+            "{{LONG_PI}}": str(clickinfo[1])
+        }
+        
     for p in doc.paragraphs:
         for key, value in datos.items():
             reemplazar_datos_en_runs(p, key, value)
     return doc
 
-def reemplazar_datos_nan(doc, nombres, apellidos, correo, finicio, ffin, selected_variable, estacion_seleccionada, descrip_solicit):
+def reemplazar_datos_nan(tpers, doc, nombres, apellidos, correo, finicio, ffin, selected_variable, estacion_seleccionada, descrip_solicit):
     if not finicio or not ffin:
         return "Selecciona ambas fechas."
     
@@ -55,9 +65,14 @@ def reemplazar_datos_nan(doc, nombres, apellidos, correo, finicio, ffin, selecte
         meses = ""  # No es necesario cuando se incluye la fecha completa
         anos = ""   # No es necesario cuando se incluye la fecha completa
     
+    if tpers == 'Persona natural':
+        apellidosm = apellidos.upper()
+    elif tpers == 'Persona jurídica':
+        apellidosm = " "
+
     datos = {
         "{{NOMBRES}}": nombres.upper(),
-        "{{APELLIDOS}}": apellidos.upper(),
+        "{{APELLIDOS}}": apellidosm,
         "{{CORREO}}": correo,
         "{{DIAS}}": dias,
         "{{MESES}}": meses,
@@ -71,7 +86,7 @@ def reemplazar_datos_nan(doc, nombres, apellidos, correo, finicio, ffin, selecte
             reemplazar_datos_en_runs(p, key, value)
     return doc
 
-def reemplazar_datos_precipd(doc, nombres, apellidos, finicio, ffin, selected_variable, estacion_seleccionada, dia, mes_nm, ano_p, primer_valor):
+def reemplazar_datos_precipd(tpers, doc, nombres, apellidos, finicio, ffin, selected_variable, estacion_seleccionada, dia, mes_nm, ano_p, primer_valor):
     if not finicio or not ffin:
         return "Selecciona ambas fechas."
     
@@ -97,9 +112,14 @@ def reemplazar_datos_precipd(doc, nombres, apellidos, finicio, ffin, selected_va
         meses = ""  # No es necesario cuando se incluye la fecha completa
         anos = ""   # No es necesario cuando se incluye la fecha completa
     
+    if tpers == 'Persona natural':
+        apellidosm = apellidos.upper()
+    elif tpers == 'Persona jurídica':
+        apellidosm = " "
+
     datos = {
         "{{NOMBRES}}": nombres.upper(),
-        "{{APELLIDOS}}": apellidos.upper(),
+        "{{APELLIDOS}}": apellidosm,
         "{{DIAS}}": dias,
         "{{MESES}}": meses,
         "{{AÑO}}": anos,
@@ -123,7 +143,7 @@ def reemplazar_datos_precipd(doc, nombres, apellidos, finicio, ffin, selected_va
 
     return doc
 
-def reemplazar_datos(doc, nombres, apellidos, finicio, ffin, selected_variable, estacion_seleccionada):
+def reemplazar_datos(tpers, doc, nombres, apellidos, finicio, ffin, selected_variable, estacion_seleccionada):
     if not finicio or not ffin:
         return "Selecciona ambas fechas."
     
@@ -149,9 +169,14 @@ def reemplazar_datos(doc, nombres, apellidos, finicio, ffin, selected_variable, 
         meses = ""  # No es necesario cuando se incluye la fecha completa
         anos = ""   # No es necesario cuando se incluye la fecha completa
     
+    if tpers == 'Persona natural':
+        apellidosm = apellidos.upper()
+    elif tpers == 'Persona jurídica':
+        apellidosm = " "
+
     datos = {
         "{{NOMBRES}}": nombres.upper(),
-        "{{APELLIDOS}}": apellidos.upper(),
+        "{{APELLIDOS}}": apellidosm,
         "{{DIAS}}": dias,  # Manejar caso donde dias es None
         "{{MESES}}": meses,  # Manejar caso donde meses es None
         "{{AÑO}}": anos, #if ano else "",  # Manejar caso donde ano es None

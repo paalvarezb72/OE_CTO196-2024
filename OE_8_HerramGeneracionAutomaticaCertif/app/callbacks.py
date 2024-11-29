@@ -33,7 +33,7 @@ def register_callbacks(app,data):
         coordenadas = (click_lat_lng["latlng"]["lat"], click_lat_lng["latlng"]["lng"])
         return coordenadas
 
-    UPLOAD_DIRECTORY = 'C:/Users/user/Documents/IDEAM/2024/Obligaciones_especificas_ejecucion/OE_8_HerramGeneracionAutomaticaCertif/shp_users_uploaded/'
+    UPLOAD_DIRECTORY = 'C:/Users/palvarez/Downloads/'
     @app.callback(
         Output("upload-status", "children"),
         Input("upload-data", "contents"),
@@ -278,14 +278,14 @@ def register_callbacks(app,data):
             try:
                 # Verificar que los campos obligatorios siempre estén llenos
                 if tpers == 'Persona jurídica':
-                    if not (tdoc and ndoc and nombres and apellidos and gintdp and correo and tel and selected_variable): #and estacion_nombre):
+                    if not (tdoc and ndoc and nombres and gintdp and correo and tel and selected_variable and fecha_inicio): #and estacion_nombre):
                         message_sdpj = "Por favor, diligencie completamente el formulario para obtener su certificación."
                         return (None, html.Div(message_sdpj,
                                             style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
                                 None, None, message_sdpj)
                 elif tpers == 'Persona natural':
                     if not (tdoc and ndoc and nombres and apellidos and gendp and getndp and infpob and discdp and
-                            gintdp and correo and tel and selected_variable): #and estacion_nombre):
+                            gintdp and correo and tel and fecha_inicio and selected_variable): #and estacion_nombre):
                         message_sdpn = "Por favor, diligencie completamente el formulario para obtener su certificación."
                         return (None, html.Div(message_sdpn,
                                             style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
@@ -319,7 +319,7 @@ def register_callbacks(app,data):
                 resultado_gp = request_gp.ejecutar_geoprocesamiento(data_request)
                 print(resultado_gp)
                 if resultado_gp["status"] == "NO_STATION":            
-                    doc = create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, clickinfo)
+                    doc = create_certificate_no_station(tpers, nombres, apellidos, correo, descrip_solicit, clickinfo)
                     date_rnow_str = datetime.now().strftime("%Y%m%d_%H%M%S")
                     nombre_archivo_final = f"{date_rnow_str}_{plantillas_por_variable['Sin Estación']}"
                     doc.save(nombre_archivo_final)
@@ -339,8 +339,6 @@ def register_callbacks(app,data):
                     cod_estacion = resultado_gp["message"]
                     estacion_seleccionada = data[data['CODIGO'] == cod_estacion].iloc[0]
                     inicio, fin = construir_rango_fechas(fecha_inicio, fecha_fin)
-                    print(inicio)
-                    print(fin)
                     sensor = obtener_sensor(selected_variable)
                     codestacion = construir_codestacion(estacion_seleccionada)
 
@@ -364,8 +362,8 @@ def register_callbacks(app,data):
                     print(stationdf_fnl)
                     # Resultado si no hay datos
                     if stationdf_fnl.empty or stationdf_fnl['Valor'].isna().all():
-                        doc = create_certificate_nodata(nombres, apellidos, correo, fecha_inicio, fecha_fin, selected_variable, 
-                                                            estacion_seleccionada, descrip_solicit)
+                        doc = create_certificate_nodata(tpers, nombres, apellidos, correo, fecha_inicio, fecha_fin,
+                                                        selected_variable, estacion_seleccionada, descrip_solicit)
                         date_rnow_str = datetime.now().strftime("%Y%m%d_%H%M%S")
                         nombre_archivo_final = f"{date_rnow_str}_{plantillas_por_variable['Sin Datos']}"
                         doc.save(nombre_archivo_final)
@@ -381,7 +379,8 @@ def register_callbacks(app,data):
                                                     style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkorange', 'font-size': 16}),
                                 "Certificación tipo oficio lamento sin datos", pdf_path, message_dnd)
 
-                    doc, nombre_plantilla = select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, correo, fecha_inicio, fecha_fin, estacion_seleccionada, descrip_solicit)
+                    doc, nombre_plantilla = select_plantilla(tpers, selected_variable, stationdf_fnl, nombres, apellidos, correo, fecha_inicio, fecha_fin,
+                                                             estacion_seleccionada, descrip_solicit)
                     doc = insert_table_in_doc(doc, stationdf_fnl, selected_variable)
 
                     date_rnow_str = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -564,136 +563,134 @@ def register_callbacks(app,data):
     #     else:
     #         return None
 
-    # @app.callback(
-    #     [Output("saved-information", "children"),
-    #      Output("download-certif", "data")],
-    #     Input("descargar-button", "n_clicks"),
-    #     [State("gp-result-store", "data"),
-    #      State("certtyc-result-store", "data"),
-    #      State("pdf_data", "data"),
-    #      State("tpersona-ri","value"),
-    #      State("tdoc-dp", "value"),
-    #      State("ndoc-input", "value"),
-    #      State("nombres-input", "value"),
-    #      State("apellidos-input", "value"),
-    #      State("correo-input", "value"),
-    #      State("tel-input", "value"),
-    #      State("genero-dp", "value"),
-    #      State("genero-input", "value"),
-    #      State("grupetn-dp", "value"),
-    #      State("grupetn-input", "value"),
-    #      State("infpoblac-dp", "value"),
-    #      State("discap-dp", "value"),
-    #      State("discap-input", "value"),
-    #      State("ginteres-dp", "value"),
-    #      State("ginteres-input", "value"),
-    #      State("variable-dp", "value"),
-    #      State("tiposerie-dp", "value"),
-    #      State("dias-dropdown", "value"),
-    #      State("meses-dropdown", "value"),
-    #      State("ano-dropdown", "value"),
-    #      State("upload-data", "filename"),
-    #      State("click-info", "children")],
-    #      prevent_initial_call=True
-    # )
-    # def guardresults_regsolicit_tb(n_clicks,gpresult,outstate,pdf_path,tpers,tdoc, ndoc, nombres, apell,
-    #                                corr, tel, gendp, genin, getndp, getnin, infpob, discdp,
-    #                                discin, gintdp, gintin, vardp, tipsrdp, dia, mes, ano, upld, clickinfo):
-    #     if n_clicks and pdf_path is None:
-    #         pass
+    @app.callback(
+        [Output("saved-information", "children"),
+         Output("download-certif", "data")],
+        Input("descargar-button", "n_clicks"),
+        [State("gp-result-store", "data"),
+         State("certtyc-result-store", "data"),
+         State("pdf_data", "data"),
+         State("tpersona-ri","value"),
+         State("tdoc-dp", "value"),
+         State("ndoc-input", "value"),
+         State("nombres-input", "value"),
+         State("apellidos-input", "value"),
+         State("correo-input", "value"),
+         State("tel-input", "value"),
+         State("genero-dp", "value"),
+         State("genero-input", "value"),
+         State("grupetn-dp", "value"),
+         State("grupetn-input", "value"),
+         State("infpoblac-dp", "value"),
+         State("discap-dp", "value"),
+         State("discap-input", "value"),
+         State("ginteres-dp", "value"),
+         State("ginteres-input", "value"),
+         State("variable-dp", "value"),
+         State("tiposerie-dp", "value"),
+         State("inidate-pckr", "date"),
+         State("findate-pckr", "date"),
+         State("upload-data", "filename"),
+         State("click-info", "children")],
+         prevent_initial_call=True
+    )
+    def guardresults_regsolicit_tb(n_clicks,gpresult,outstate,pdf_path,tpers,tdoc, ndoc, nombres, apell,
+                                   corr, tel, gendp, genin, getndp, getnin, infpob, discdp,
+                                   discin, gintdp, gintin, vardp, tipsrdp, fecha_inicio, fecha_fin, upld, clickinfo):
+        if n_clicks and pdf_path is None:
+            pass
         
-    #     update_table = UpdateTable()
+        update_table = UpdateTable()
 
-    #     if isinstance(gpresult, dict):
-    #         resultado_status = gpresult.get('status', 'Estado no disponible')
-    #         resultado_message = gpresult.get('message', 'Mensaje no disponible')
-    #     else:
-    #         print(f"gpresult no es un diccionario: {gpresult}")
-    #         resultado_status = "Estado no disponible"
-    #         resultado_message = "Mensaje no disponible"
+        if isinstance(gpresult, dict):
+            resultado_status = gpresult.get('status', 'Estado no disponible')
+            resultado_message = gpresult.get('message', 'Mensaje no disponible')
+        else:
+            print(f"gpresult no es un diccionario: {gpresult}")
+            resultado_status = "Estado no disponible"
+            resultado_message = "Mensaje no disponible"
 
-    #     if isinstance(outstate, str):
-    #         outstate_str = outstate
-    #     else:
-    #         print(f"outstate no es una cadena: {outstate}")
-    #         outstate_str = "Estado no disponible"
+        if isinstance(outstate, str):
+            outstate_str = outstate
+        else:
+            print(f"outstate no es una cadena: {outstate}")
+            outstate_str = "Estado no disponible"
 
-    #     try:
-    #         # Operador ternario para asignaciones más limpias
-    #         gendp = gendp if gendp else genin
-    #         getndp = getndp if getndp else getnin
-    #         discdp = discdp if discdp else discin
-    #         gintdp = gintdp if gintdp else gintin
+        try:
+            # Operador ternario para asignaciones más limpias
+            gendp = gendp if gendp else genin
+            getndp = getndp if getndp else getnin
+            discdp = discdp if discdp else discin
+            gintdp = gintdp if gintdp else gintin
 
-    #         if upld is None:
-    #             coord = clickinfo
-    #             x = coord[1]
-    #             y = coord[0]
-    #             coord_s = (coord[0],coord[1])
-    #             coord_str = str(coord_s)
-    #             print(coord)
-    #         else:
-    #             print(upld)
-    #             coordenadas = update_table.obtener_coordenadas_zip(os.path.join(UPLOAD_DIRECTORY, upld))
-    #             extract_coords = (coordenadas[0][1],coordenadas[0][0])
-    #             coord_str = str(extract_coords)
-    #             x = coordenadas[0][0]
-    #             y = coordenadas[0][1]
+            if upld is None:
+                coord = clickinfo
+                x = coord[1]
+                y = coord[0]
+                coord_s = (coord[0],coord[1])
+                coord_str = str(coord_s)
+                print(coord)
+            else:
+                print(upld)
+                coordenadas = update_table.obtener_coordenadas_zip(os.path.join(UPLOAD_DIRECTORY, upld))
+                extract_coords = (coordenadas[0][1],coordenadas[0][0])
+                coord_str = str(extract_coords)
+                x = coordenadas[0][0]
+                y = coordenadas[0][1]
 
-    #         # Fecha y hora actuales en la zona horaria local ## Es correspondiente y no es necesario
-    #         # cambiar la Timezone
-    #         date_now = datetime.now()
+            # Fecha y hora actuales en la zona horaria local ## Es correspondiente y no es necesario
+            # cambiar la Timezone
+            date_now = datetime.now()
 
-    #         data_list = [
-    #             {
-    #                 "tpersona_ri": tpers,
-    #                 "tdoc_dp": tdoc,
-    #                 "ndoc_input": ndoc,
-    #                 "nombres_input": nombres,
-    #                 "apellidos_in": apell,
-    #                 "correo_input": corr,
-    #                 "tel_input": tel,
-    #                 "genero_dp": gendp,
-    #                 "genero_input": gendp,
-    #                 "grupetn_dp": getndp,
-    #                 "grupetn_input": getndp,
-    #                 "infpoblac_dp": infpob,
-    #                 "discap_dp": discdp,
-    #                 "discap_input": discdp,
-    #                 "ginteres_dp": gintdp,
-    #                 "ginteres_input": gintdp,
-    #                 "variable_dp": vardp,
-    #                 "tiposerie_dp": tipsrdp,
-    #                 "dias_dropdown": dia,
-    #                 "meses_dropdown": mes,
-    #                 "ano_dropdown": ano,
-    #                 "upload_zip_click_info": coord_str,
-    #                 "resultado_status_": resultado_status,
-    #                 "resultado_message_": resultado_message,
-    #                 "output_state": outstate_str,
-    #                 "date_displ": date_now,
-    #                 "geometry": {
-    #                     "x": x,
-    #                     "y": y,
-    #                     "spatialReference": {"wkid": 4326}
-    #                     }
-    #             }]
+            data_list = [
+                {
+                    "tpersona_ri": tpers,
+                    "tdoc_dp": tdoc,
+                    "ndoc_input": ndoc,
+                    "nombres_input": nombres,
+                    "apellidos_in": apell,
+                    "correo_input": corr,
+                    "tel_input": tel,
+                    "genero_dp": gendp,
+                    "genero_input": gendp,
+                    "grupetn_dp": getndp,
+                    "grupetn_input": getndp,
+                    "infpoblac_dp": infpob,
+                    "discap_dp": discdp,
+                    "discap_input": discdp,
+                    "ginteres_dp": gintdp,
+                    "ginteres_input": gintdp,
+                    "variable_dp": vardp,
+                    "tiposerie_dp": tipsrdp,
+                    "inidate_pckr": fecha_inicio,
+                    "findate_pckr": fecha_fin,
+                    "upload_zip_click_info": coord_str,
+                    "resultado_status_": resultado_status,
+                    "resultado_message_": resultado_message,
+                    "output_state": outstate_str,
+                    "date_displ": date_now,
+                    "geometry": {
+                        "x": x,
+                        "y": y,
+                        "spatialReference": {"wkid": 4326}
+                        }
+                }]
             
-    #         result = update_table.actualizar_tabla(data_list)
-    #         print("Intentando subir los siguientes datos:", data_list)
-    #         print("Resultado de la actualización de la tabla:", result)
+            result = update_table.actualizar_tabla(data_list)
+            print("Intentando subir los siguientes datos:", data_list)
+            print("Resultado de la actualización de la tabla:", result)
 
-    #         return ("Datos guardados exitosamente", dcc.send_file(pdf_path))
-    #     except Exception as e:
-    #         print(f"Error en el proceso de cargue de datos: {e}")
-    #         return (None, None)
+            return ("Datos guardados exitosamente", dcc.send_file(pdf_path))
+        except Exception as e:
+            print(f"Error en el proceso de cargue de datos: {e}")
+            return (None, None)
         
-    # @app.callback(
-    #     Output('esperarpdf-dialog', 'displayed'),
-    #     Input('descargar-button', 'n_clicks')
-    # )
-    # def show_pdf_dialog(n_clicks):
-    #     if n_clicks:
-    #         return True  # Muestra el diálogo
-    #     return False  # No muestra el diálogo
+    @app.callback(
+        Output('esperarpdf-dialog', 'displayed'),
+        Input('descargar-button', 'n_clicks')
+    )
+    def show_pdf_dialog(n_clicks):
+        if n_clicks:
+            return True  # Muestra el diálogo
+        return False  # No muestra el diálogo
     

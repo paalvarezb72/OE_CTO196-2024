@@ -13,19 +13,26 @@ def create_certificate(template_path, output_path, data):
     # Lógica para llenar la plantilla con datos
     doc.save(output_path)
     
-def create_certificate_no_station(nombres, apellidos, correo, descrip_solicit, clickinfo):
-    template_path = "PlantillaOficioLamentoSinEstaciones.docx"
-    doc = Document(template_path)
-    doc = reemplazar_datos_noEMC(doc, nombres, apellidos, correo, descrip_solicit, clickinfo)
-    return doc
+def create_certificate_no_station(tpers, nombres, apellidos, correo, descrip_solicit, clickinfo):
+    if tpers == 'Persona natural':
+        template_path = "PlantillaOficioLamentoSinEstaciones.docx"
+        doc = Document(template_path)
+        doc = reemplazar_datos_noEMC(tpers, doc, nombres, apellidos, correo, descrip_solicit, clickinfo)
+        return doc
+    elif tpers == 'Persona jurídica':
+        template_path = "PlantillaOficioLamentoSinEstaciones_jurid.docx"
+        doc = Document(template_path)
+        doc = reemplazar_datos_noEMC(tpers, doc, nombres, apellidos, correo, descrip_solicit, clickinfo)
+        return doc
 
-def create_certificate_nodata(nombres, apellidos, correo, fecha_inicio, fecha_fin, selected_variable, estacion_seleccionada, descrip_solicit):
+
+def create_certificate_nodata(tpers, nombres, apellidos, correo, fecha_inicio, fecha_fin, selected_variable, estacion_seleccionada, descrip_solicit):
     template_path = "PlantillaOficioLamentoSinDatos.docx"
     doc = Document(template_path)
-    doc = reemplazar_datos_nan(doc, nombres, apellidos, correo, fecha_inicio, fecha_fin, selected_variable, estacion_seleccionada, descrip_solicit)
+    doc = reemplazar_datos_nan(tpers, doc, nombres, apellidos, correo, fecha_inicio, fecha_fin, selected_variable, estacion_seleccionada, descrip_solicit)
     return doc
 
-def select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, correo, fecha_inicio, fecha_fin, estacion_seleccionada, descrip_solicit):
+def select_plantilla(tpers, selected_variable, stationdf_fnl, nombres, apellidos, correo, fecha_inicio, fecha_fin, estacion_seleccionada, descrip_solicit):
     plantillas_por_variable = {
         "Precipitación total diaria": "PlantillaPrecipDiaria.docx",
         "Precipitación total mensual": "PlantillaPrecipMensual.docx",
@@ -54,7 +61,7 @@ def select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, corre
     # Determina si el DataFrame está vacío para seleccionar la plantilla
     clave_plantilla = "Sin Datos" if stationdf_fnl.empty else selected_variable
     if clave_plantilla == "Sin Datos":
-        doc = create_certificate_nodata(nombres, apellidos, correo, fecha_inicio, fecha_fin, selected_variable, estacion_seleccionada, descrip_solicit)
+        doc = (nombres, apellidos, correo, fecha_inicio, fecha_fin, selected_variable, estacion_seleccionada, descrip_solicit)
     else:
         clave_plantilla = selected_variable
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
@@ -71,9 +78,9 @@ def select_plantilla(selected_variable, stationdf_fnl, nombres, apellidos, corre
             ano_p = primer_fecha.year
             primer_valor = stationdf_fnl['Valor'].iloc[0]
 
-            doc = reemplazar_datos_precipd(doc, nombres, apellidos, fecha_inicio, fecha_fin, selected_variable, estacion_seleccionada, dia, mes_nm, ano_p, primer_valor)
+            doc = reemplazar_datos_precipd(tpers, doc, nombres, apellidos, fecha_inicio, fecha_fin, selected_variable, estacion_seleccionada, dia, mes_nm, ano_p, primer_valor)
         else:
-            doc = reemplazar_datos(doc, nombres, apellidos, fecha_inicio, fecha_fin, selected_variable, estacion_seleccionada)
+            doc = reemplazar_datos(tpers, doc, nombres, apellidos, fecha_inicio, fecha_fin, selected_variable, estacion_seleccionada)
 
         und = set_und(selected_variable)
         stationdf_fnl.loc[:, 'Valor'] = stationdf_fnl['Valor'].fillna('ND')
