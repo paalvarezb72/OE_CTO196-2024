@@ -15,4 +15,4 @@ if __name__ == '__main__':
     
     # Ejecutar el servidor
     #app.run_server(debug=True)
-    app.run_server(host="192.168.154.16", port=8050, debug=True)
+    app.run_server(host="192.168.156.15", port=8050, debug=True)

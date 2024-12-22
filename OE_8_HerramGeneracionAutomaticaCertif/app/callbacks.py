@@ -211,7 +211,7 @@ def register_callbacks(app,data):
     )
     def update_date(year, current_date):
         """
-        Actualiza la fecha visible del DatePickerSingle al año seleccionado en el slider,
+        Actualiza la fecha visible del DatePickerSingle al año seleccionado en el slider de inidate,
         manteniendo el mismo mes y día.
         """
         # Convertir la fecha actual en un objeto datetime
@@ -232,7 +232,7 @@ def register_callbacks(app,data):
     )
     def update_date(year, current_date):
         """
-        Actualiza la fecha visible del DatePickerSingle al año seleccionado en el slider,
+        Actualiza la fecha visible del DatePickerSingle al año seleccionado en el slider de findate,
         manteniendo el mismo mes y día.
         """
         # Convertir la fecha actual en un objeto datetime

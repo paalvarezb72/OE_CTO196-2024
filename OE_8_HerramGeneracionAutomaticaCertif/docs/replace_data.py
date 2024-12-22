@@ -47,23 +47,42 @@ def reemplazar_datos_nan(tpers, doc, nombres, apellidos, correo, finicio, ffin, 
     fecha_inicio = datetime.fromisoformat(finicio)
     fecha_fin = datetime.fromisoformat(ffin)
 
-    # Determinar si las fechas están en el mismo mes y año
-    mismo_mes = fecha_inicio.month == fecha_fin.month
-    mismo_ano = fecha_inicio.year == fecha_fin.year
+    # Inicialización de textos
+    dias = ""
+    meses = ""
+    anos = ""
 
-    # Generar textos dinámicos para los días, meses y años
-    if mismo_mes and mismo_ano:
-        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
-        meses = fecha_inicio.strftime('%B')  # Nombre del mes (sin repetir)
-        anos = str(fecha_inicio.year)        # Año único
-    elif mismo_ano:
-        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
-        meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')}"
-        anos = str(fecha_inicio.year)
-    else:
-        dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
-        meses = ""  # No es necesario cuando se incluye la fecha completa
-        anos = ""   # No es necesario cuando se incluye la fecha completa
+    # Verificar la variable seleccionada: Anual, Mensual o Diaria
+    if 'anual' in selected_variable.lower():
+        # Solo interesa el año o años
+        if fecha_inicio.year == fecha_fin.year:
+            anos = str(fecha_inicio.year)
+        else:
+            anos = f"{fecha_inicio.year} a {fecha_fin.year}"
+
+    elif 'mensual' in selected_variable.lower():
+        # Se consideran meses y años
+        if fecha_inicio.year == fecha_fin.year:
+            if fecha_inicio.month == fecha_fin.month:
+                meses = fecha_inicio.strftime('%B')
+            else:
+                meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')} de"
+            anos = str(fecha_inicio.year)
+        else:
+            meses = f"{fecha_inicio.strftime('%B')} de {fecha_inicio.year} a {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+            anos = ""
+
+    elif 'diaria' in selected_variable.lower():
+        # Se consideran días, meses y años
+        if fecha_inicio.year == fecha_fin.year and fecha_inicio.month == fecha_fin.month:
+            dias = f"{fecha_inicio.day} al {fecha_fin.day}"
+            meses = fecha_inicio.strftime('%B')
+            anos = str(fecha_inicio.year)
+        elif fecha_inicio.year == fecha_fin.year:
+            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} al {fecha_fin.day} de {fecha_fin.strftime('%B')}"
+            anos = str(fecha_inicio.year)
+        else:
+            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
     
     if tpers == 'Persona natural':
         apellidosm = apellidos.upper()
@@ -94,23 +113,42 @@ def reemplazar_datos_precipd(tpers, doc, nombres, apellidos, finicio, ffin, sele
     fecha_inicio = datetime.fromisoformat(finicio)
     fecha_fin = datetime.fromisoformat(ffin)
 
-    # Determinar si las fechas están en el mismo mes y año
-    mismo_mes = fecha_inicio.month == fecha_fin.month
-    mismo_ano = fecha_inicio.year == fecha_fin.year
+    # Inicialización de textos
+    dias = ""
+    meses = ""
+    anos = ""
 
-    # Generar textos dinámicos para los días, meses y años
-    if mismo_mes and mismo_ano:
-        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
-        meses = fecha_inicio.strftime('%B')  # Nombre del mes (sin repetir)
-        anos = str(fecha_inicio.year)        # Año único
-    elif mismo_ano:
-        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
-        meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')}"
-        anos = str(fecha_inicio.year)
-    else:
-        dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
-        meses = ""  # No es necesario cuando se incluye la fecha completa
-        anos = ""   # No es necesario cuando se incluye la fecha completa
+    # Verificar la variable seleccionada: Anual, Mensual o Diaria
+    if 'anual' in selected_variable.lower():
+        # Solo interesa el año o años
+        if fecha_inicio.year == fecha_fin.year:
+            anos = str(fecha_inicio.year)
+        else:
+            anos = f"{fecha_inicio.year} a {fecha_fin.year}"
+
+    elif 'mensual' in selected_variable.lower():
+        # Se consideran meses y años
+        if fecha_inicio.year == fecha_fin.year:
+            if fecha_inicio.month == fecha_fin.month:
+                meses = fecha_inicio.strftime('%B')
+            else:
+                meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')} de"
+            anos = str(fecha_inicio.year)
+        else:
+            meses = f"{fecha_inicio.strftime('%B')} de {fecha_inicio.year} a {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+            anos = ""
+
+    elif 'diaria' in selected_variable.lower():
+        # Se consideran días, meses y años
+        if fecha_inicio.year == fecha_fin.year and fecha_inicio.month == fecha_fin.month:
+            dias = f"{fecha_inicio.day} al {fecha_fin.day}"
+            meses = fecha_inicio.strftime('%B')
+            anos = str(fecha_inicio.year)
+        elif fecha_inicio.year == fecha_fin.year:
+            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} al {fecha_fin.day} de {fecha_fin.strftime('%B')}"
+            anos = str(fecha_inicio.year)
+        else:
+            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
     
     if tpers == 'Persona natural':
         apellidosm = apellidos.upper()
@@ -151,24 +189,43 @@ def reemplazar_datos(tpers, doc, nombres, apellidos, finicio, ffin, selected_var
     fecha_inicio = datetime.fromisoformat(finicio)
     fecha_fin = datetime.fromisoformat(ffin)
 
-    # Determinar si las fechas están en el mismo mes y año
-    mismo_mes = fecha_inicio.month == fecha_fin.month
-    mismo_ano = fecha_inicio.year == fecha_fin.year
+    # Inicialización de textos
+    dias = ""
+    meses = ""
+    anos = ""
 
-    # Generar textos dinámicos para los días, meses y años
-    if mismo_mes and mismo_ano:
-        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
-        meses = fecha_inicio.strftime('%B')  # Nombre del mes (sin repetir)
-        anos = str(fecha_inicio.year)        # Año único
-    elif mismo_ano:
-        dias = f"{fecha_inicio.day} al {fecha_fin.day}"
-        meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')}"
-        anos = str(fecha_inicio.year)
-    else:
-        dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
-        meses = ""  # No es necesario cuando se incluye la fecha completa
-        anos = ""   # No es necesario cuando se incluye la fecha completa
-    
+    # Verificar la variable seleccionada: Anual, Mensual o Diaria
+    if 'anual' in selected_variable.lower():
+        # Solo interesa el año o años
+        if fecha_inicio.year == fecha_fin.year:
+            anos = str(fecha_inicio.year)
+        else:
+            anos = f"{fecha_inicio.year} a {fecha_fin.year}"
+
+    elif 'mensual' in selected_variable.lower():
+        # Se consideran meses y años
+        if fecha_inicio.year == fecha_fin.year:
+            if fecha_inicio.month == fecha_fin.month:
+                meses = fecha_inicio.strftime('%B')
+            else:
+                meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')} de"
+            anos = str(fecha_inicio.year)
+        else:
+            meses = f"{fecha_inicio.strftime('%B')} de {fecha_inicio.year} a {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+            anos = ""
+
+    elif 'diaria' in selected_variable.lower():
+        # Se consideran días, meses y años
+        if fecha_inicio.year == fecha_fin.year and fecha_inicio.month == fecha_fin.month:
+            dias = f"{fecha_inicio.day} al {fecha_fin.day}"
+            meses = fecha_inicio.strftime('%B')
+            anos = str(fecha_inicio.year)
+        elif fecha_inicio.year == fecha_fin.year:
+            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} al {fecha_fin.day} de {fecha_fin.strftime('%B')}"
+            anos = str(fecha_inicio.year)
+        else:
+            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+
     if tpers == 'Persona natural':
         apellidosm = apellidos.upper()
     elif tpers == 'Persona jurídica':

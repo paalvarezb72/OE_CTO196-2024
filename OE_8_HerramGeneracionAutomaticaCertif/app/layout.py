@@ -65,7 +65,7 @@ def create_layout(app, data):
                         title="Datos obtenidos de la red de observación en superficie IDEAM "),
                 # Espaciador
                 html.Div(style={'height': '10px', 'width': '100%'}),
-                html.P("Instrucciones:", style={'font-family': 'arial', 'text-align': 'justify','font-size': 11,
+                html.P("Instrucciones:", style={'font-family': 'arial', 'text-align': 'justify','font-size': 13,
                                                 'font-weight': 'bold', 'margin-bottom': '5px'}),
                 html.P("Respetado usuario, en esta aplicación podrá obtener certificaciones del estado del tiempo;\
                         para ello se solicitarán sus datos personales, de contacto, variable meteorológica, periodo,\
@@ -73,14 +73,14 @@ def create_layout(app, data):
                         .dbf, .prj, .sbn, .sbx, .shp, .shx) y comprimido en .zip para ubicar el punto de interés o\
                         hacer click en el mapa más adelante.",
                         style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px',
-                               'font-size': 11}),
+                               'font-size': 13}),
                 html.P(["En esta aplicación, se generará una certificación por variable y periodo, si requiere más, recargue la página luego de terminar el proceso.\
                          El diligenciamiento de todos los campos ES OBLIGATORIO para obtener el documento. Tenga\
                        en cuenta la ",
                        dcc.Link("política de tratamiento y protección de datos personales.",
                                 href="https://www.ideam.gov.co/sites/default/files/archivos/politica_de_tratamiento_y_proteccion_de_datos_personales_0.pdf",
                                 target="_blank")],
-                       style={'text-align': 'justify', 'margin-bottom': '20px', 'font-weight': 'bold'}), #'font-family': 'arial', 
+                       style={'text-align': 'justify', 'margin-bottom': '20px', 'font-weight': 'bold', 'font-size': 13}), #'font-family': 'arial', 
                 html.Div([
                     html.P("Datos personales:", style={'font-family': 'arial', 'text-align': 'center',
                                                        'font-weight': 'bold', 'font-size': 13}),
@@ -245,7 +245,7 @@ def create_layout(app, data):
                 html.Div(style={'height': '20px', 'width': '100%'}),
 
                 html.Div([
-                        html.P("Por favor, escoja las fechas inicial y final de interés para su certificación.\
+                        html.P("Por favor, seleccione la fecha inicial y la fecha final de interés para su certificación.\
                                Si necesita desplazarse entre años, utilice el Slider.",
                                style={'font-family': 'arial', 'text-align': 'justify'}),#, 'margin-bottom': '20px'}),
                     ], style={'height': '20px', 'width': '100%'}),
@@ -263,7 +263,7 @@ def create_layout(app, data):
                             min=1955,
                             max=datetime.now().year,
                             step=1,
-                            value=datetime.now().year,
+                            value=1955,
                             marks={year: str(year) for year in range(1955, datetime.now().year + 1, 10)},
                             tooltip={"placement": "bottom", "always_visible": True}
                         ),
@@ -272,7 +272,7 @@ def create_layout(app, data):
                             min_date_allowed=date(1955, 1, 1),
                             max_date_allowed=datetime.now(),
                             initial_visible_month=datetime.now(),
-                            date=datetime.now(),
+                            date=date(1955, 1, 1),
                             style={'width': '100%'}
                         ),
                     ], style={'flex':1, 'padding':'0 10px', 'min-width': '200px',
