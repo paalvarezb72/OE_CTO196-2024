@@ -1,0 +1,27 @@
+## Se ignoran los siguientes archivos o carpetas en este equipo
+# Las carpetas .ipynb_checkpoints
+/.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Las carpetas __pycache__
+/__pycache__/
+**/__pycache__/
+
+# Todas las carpetas con archivos crudos para evitar duplicidad
+**/19*/
+**/20*/
+**/RawUnmodified*/
+
+# Las carpetas con las salidas de controles de calidad
+**/QCResult*/
+
+# Las carpetas de pruebas
+**/Done*/
+**/Test*/
+
+# Archivos de pruebas
+cant*.csv
+prueba.py
+
+# Archivos de logs
+*.log
