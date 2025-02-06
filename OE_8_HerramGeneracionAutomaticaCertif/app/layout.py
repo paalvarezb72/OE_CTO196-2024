@@ -3,6 +3,7 @@ from dash import html, dcc
 import pandas as pd
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 from datetime import date, datetime
 from arcgis.gis import GIS
 from arcgis.mapping import WebMap

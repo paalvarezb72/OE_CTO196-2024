@@ -7,10 +7,11 @@
 /__pycache__/
 **/__pycache__/
 
-# Todas las carpetas con archivos crudos para evitar duplicidad
+# Todas las carpetas con archivos crudos y con QC para evitar duplicidad
 **/19*/
 **/20*/
 **/RawUnmodified*/
+**/ReadyToCassandraFiles*/
 
 # Las carpetas con las salidas de controles de calidad
 **/QCResult*/

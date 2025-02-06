@@ -1,4 +1,4 @@
-Unnamed: 0;Station;lat;long;entidad;FreqInf;Observ_freqs
+Unnamed: 0;station;lat;long;entidad;FreqInf;Observ_freqs
 0;11105020;7.154333333;-76.97719444;IDEAM;h;
 1;11135030;8.036722222;-77.08786111;IDEAM;h;
 2;12015100;7.94075;-76.69616667;IDEAM;h;
