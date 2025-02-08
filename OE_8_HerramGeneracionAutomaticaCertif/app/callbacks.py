@@ -175,10 +175,10 @@ def register_callbacks(app,data):
 
     # Callback que sincroniza los rangos permitidos entre fecha inicial y fecha final
     @app.callback(
-        Output('inidate-pckr', 'max_date_allowed'),
-        Output('findate-pckr', 'min_date_allowed'),
-        Input('inidate-pckr', 'date'),
-        Input('findate-pckr', 'date')
+        Output('inidate-pckr', 'maxDate'),
+        Output('findate-pckr', 'minDate'),
+        Input('inidate-pckr', 'value'),
+        Input('findate-pckr', 'value')
     )
     def actualizar_rango_fechas(fecha_inicio, fecha_fin):
         """
@@ -203,46 +203,46 @@ def register_callbacks(app,data):
 
         return max_fecha_inicio, min_fecha_fin
 
-    # Callback para actualizar el calendario según el año del slider
-    @app.callback(
-        Output('inidate-pckr', 'date'),
-        Input('inyear-slider', 'value'),
-        State('inidate-pckr', 'date')
-    )
-    def update_date(year, current_date):
-        """
-        Actualiza la fecha visible del DatePickerSingle al año seleccionado en el slider de inidate,
-        manteniendo el mismo mes y día.
-        """
-        # Convertir la fecha actual en un objeto datetime
-        current_date_obj = parse_fecha(current_date).date()
+    # # Callback para actualizar el calendario según el año del slider
+    # @app.callback(
+    #     Output('inidate-pckr', 'value'),
+    #     Input('inyear-slider', 'value'),
+    #     State('inidate-pckr', 'value')
+    # )
+    # def update_date(year, current_date):
+    #     """
+    #     Actualiza la fecha visible del DatePickerSingle al año seleccionado en el slider de inidate,
+    #     manteniendo el mismo mes y día.
+    #     """
+    #     # Convertir la fecha actual en un objeto datetime
+    #     current_date_obj = parse_fecha(current_date).date()
         
-        # Crear una nueva fecha con el año del slider
-        new_date = current_date_obj.replace(year=year)
+    #     # Crear una nueva fecha con el año del slider
+    #     new_date = current_date_obj.replace(year=year)
         
-        # Retornar la nueva fecha como cadena en formato ISO
-        return new_date.strftime('%Y-%m-%d')# %H:%M:%S.%f')
+    #     # Retornar la nueva fecha como cadena en formato ISO
+    #     return new_date.strftime('%Y-%m-%d')# %H:%M:%S.%f')
     
 
-    # Callback para actualizar el calendario final según el año del slider
-    @app.callback(
-        Output('findate-pckr', 'date'),
-        Input('finyear-slider', 'value'),
-        State('findate-pckr', 'date')
-    )
-    def update_date(year, current_date):
-        """
-        Actualiza la fecha visible del DatePickerSingle al año seleccionado en el slider de findate,
-        manteniendo el mismo mes y día.
-        """
-        # Convertir la fecha actual en un objeto datetime
-        current_date_obj = parse_fecha(current_date).date()
+    # # Callback para actualizar el calendario final según el año del slider
+    # @app.callback(
+    #     Output('findate-pckr', 'value'),
+    #     Input('finyear-slider', 'value'),
+    #     State('findate-pckr', 'value')
+    # )
+    # def update_date(year, current_date):
+    #     """
+    #     Actualiza la fecha visible del DatePickerSingle al año seleccionado en el slider de findate,
+    #     manteniendo el mismo mes y día.
+    #     """
+    #     # Convertir la fecha actual en un objeto datetime
+    #     current_date_obj = parse_fecha(current_date).date()
         
-        # Crear una nueva fecha con el año del slider
-        new_date = current_date_obj.replace(year=year)
+    #     # Crear una nueva fecha con el año del slider
+    #     new_date = current_date_obj.replace(year=year)
         
-        # Retornar la nueva fecha como cadena en formato ISO
-        return new_date.strftime('%Y-%m-%d')# %H:%M:%S.%f')
+    #     # Retornar la nueva fecha como cadena en formato ISO
+    #     return new_date.strftime('%Y-%m-%d')# %H:%M:%S.%f')
 
     @app.callback(
         [Output("gp-result-store", "data"), #Output("output-represanalis", "children"),
@@ -264,8 +264,8 @@ def register_callbacks(app,data):
          State("ginteres-dp", "value"),
          State("correo-input", "value"),
          State("tel-input", "value"),
-         State("inidate-pckr", "date"),
-         State("findate-pckr", "date"),
+         State("inidate-pckr", "value"),
+         State("findate-pckr", "value"),
          State("variable-dp", "value"),
          State("tiposerie-dp", "value"),
          State("upload-data", "filename"),
@@ -588,8 +588,8 @@ def register_callbacks(app,data):
          State("ginteres-input", "value"),
          State("variable-dp", "value"),
          State("tiposerie-dp", "value"),
-         State("inidate-pckr", "date"),
-         State("findate-pckr", "date"),
+         State("inidate-pckr", "value"),
+         State("findate-pckr", "value"),
          State("upload-data", "filename"),
          State("click-info", "children")],
          prevent_initial_call=True

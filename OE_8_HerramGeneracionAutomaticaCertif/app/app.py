@@ -1,11 +1,13 @@
 # app/app.py
 import dash
+import dash_mantine_components as dmc
 from app.layout import create_layout
 from app.callbacks import register_callbacks
 
-external_stylesheets = ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
-                        '/assets/styles.css'
-                            ]
+external_stylesheets = [
+    'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
+    '/assets/styles.css'] + dmc.styles.ALL
+
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title = "Certificaciones estado tiempo y clima"
 #server = app.server
