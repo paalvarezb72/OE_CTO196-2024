@@ -369,6 +369,16 @@ def create_layout(app, data):
                         html.P("Las coordenadas que seleccionó de su punto de interés son:",
                             style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '5px'}),
 
+                        # Espaciador
+                        html.Div(style={'height': '20px', 'width': '100%'}),
+                        
+                        dcc.Dropdown(
+                            id='estacion-dropdown',
+                            options=[{'label': nombre, 'value': nombre} for nombre in data['nombre']],
+                            style={'font-family': 'arial'},
+                            value=data['nombre'][0]  # Valor por defecto
+                        ),
+                        
                         html.Div([
                             html.Div(id="click-info"),  # Div para mostrar la información del clic
                             dl.Map(center=[4, -74], zoom=10, 

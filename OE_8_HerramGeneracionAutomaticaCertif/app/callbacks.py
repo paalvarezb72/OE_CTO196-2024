@@ -4,9 +4,11 @@ import base64
 import os
 import traceback
 import sys
+import dash_leaflet as dl
 from dash import html, dcc
 from datetime import date, datetime
 from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate
 from docs.generate_docs import *
 from docs.convert_a_pdf import convertir_a_pdf
 from utils.helpers import *
@@ -107,22 +109,6 @@ def register_callbacks(app,data):
             ginteres_dp_disabled,
             ginteres_input_disabled
         ]
-    
-    # @app.callback(
-    #     [Output('dias-dropdown', 'disabled'),
-    #      Output('meses-dropdown', 'disabled'),
-    #      Output('ano-dropdown', 'disabled')],
-    #     [Input('tiposerie-dp', 'value')]
-    # )
-    # def update_date_dropdowns(selected_period):
-    #     if selected_period:
-    #         if 'anual' in selected_period.lower():
-    #             return True, True, False
-    #         elif 'mensual' in selected_period.lower():
-    #             return True, False, False
-    #         elif 'diaria' in selected_period.lower():
-    #             return False, False, False
-    #     return False, False, False
 
     @app.callback(
         Output("tiposerie-dp", "options"),
@@ -243,6 +229,55 @@ def register_callbacks(app,data):
         
     #     # Retornar la nueva fecha como cadena en formato ISO
     #     return new_date.strftime('%Y-%m-%d')# %H:%M:%S.%f')
+
+    # Este callback toma la estación seleccionada del dropdown y actualiza el mapa
+    @app.callback(
+        [Output("map", "center"),  # Actualiza el centro del mapa
+         Output("map", "zoom"),    # Actualiza el zoom del mapa
+         Output("click-layer", "children")],  # Actualiza la capa con el marcador
+        [Input("estacion-dropdown", "value")]
+    )
+    def actualizar_mapa(nombre_estacion):
+        print(f"Nombre de estación recibido del dropdown: {nombre_estacion}")
+        estaciones_filtradas = data[data['nombre'] == nombre_estacion]
+        print(f"Número de estaciones encontradas: {len(estaciones_filtradas)}")
+
+        if estaciones_filtradas.empty:
+            print("No se encontraron estaciones con ese nombre.")
+            raise PreventUpdate  # Evita actualizar el mapa si no hay estación
+
+        estacion_seleccionada = estaciones_filtradas.iloc[0]
+        nueva_lat = estacion_seleccionada["latitud"]
+        nueva_lon = estacion_seleccionada["longitud"]
+
+        # Crear un marcador en la posición de la estación seleccionada
+        marcador = dl.Marker(
+            position=[nueva_lat, nueva_lon],
+            children=[
+                dl.Tooltip(f"Nombre: {estacion_seleccionada['nombre']}, Altitud: {estacion_seleccionada['altitudDEM']} m")
+            ]
+        )
+
+        return [ [nueva_lat, nueva_lon], 25, [marcador] ]  # Centro, zoom y marcador
+    
+
+    # @app.callback(
+    #     Output("mapa-estacion", "figure"),
+    #     [Input("estacion-dropdown", "value")]
+    # )
+    # def actualizar_mapa(nombre_estacion):
+    #     print(f"Nombre de estación recibido del dropdown: {nombre_estacion}")
+    #     estaciones_filtradas = data[data['nombre'] == nombre_estacion]
+    #     print(f"Numero de estaciones encontradas: {len(estaciones_filtradas)}")
+
+    #     if not estaciones_filtradas.empty:
+    #         estacion_seleccionada = estaciones_filtradas.iloc[0]
+    #         fig.update_layout(mapbox_center={"lat": estacion_seleccionada["latitud"], "lon": estacion_seleccionada["longitud"]})
+    #         return fig
+    #     else:
+    #         print("No se encontraron estaciones con ese nombre.")
+    #         raise PreventUpdate
+
 
     @app.callback(
         [Output("gp-result-store", "data"), #Output("output-represanalis", "children"),
