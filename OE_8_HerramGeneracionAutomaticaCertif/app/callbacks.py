@@ -29,13 +29,18 @@ def register_callbacks(app,data):
     )
     def display_click_info(click_lat_lng):
         if click_lat_lng is None:
-            return "Si no cargó ningún shape, haga click en el mapa para obtener las coordenadas de su punto de interés"
+            msg_click = html.Div("Si no cargó ningún shape, haga click en el mapa para obtener las coordenadas de \
+                                  su punto de interés aquí.",
+                             style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight':'bold', 'font-size': 16})
+            return msg_click
         print(f"Las coordenadas seleccinadas fueron: {click_lat_lng}") # Ver en consola las coordenadas seleccionadas
         
         coordenadas = (click_lat_lng["latlng"]["lat"], click_lat_lng["latlng"]["lng"])
         return coordenadas
 
-    UPLOAD_DIRECTORY = 'C:/Users/palvarez/Downloads/'
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # Obtiene el directorio de callbacks.py
+    UPLOAD_DIRECTORY = os.path.join(base_dir, "../user_shp_uploaded/")
+
     @app.callback(
         Output("upload-status", "children"),
         Input("upload-data", "contents"),
@@ -54,7 +59,9 @@ def register_callbacks(app,data):
                 f.write(decoded)
 
             return f'Archivo {filename} cargado y almacenado con éxito.'
-        return "No se ha cargado ningún archivo."
+        msgupload = html.Div("No se ha cargado ningún archivo.",
+                             style={'font-family': 'Arial', 'font-style': 'italic', 'font-size': 16})
+        return msgupload
 
     @app.callback(
         [Output('apellidos-input', 'disabled'),
@@ -231,34 +238,46 @@ def register_callbacks(app,data):
     #     return new_date.strftime('%Y-%m-%d')# %H:%M:%S.%f')
 
     # Este callback toma la estación seleccionada del dropdown y actualiza el mapa
+
     @app.callback(
-        [Output("map", "center"),  # Actualiza el centro del mapa
-         Output("map", "zoom"),    # Actualiza el zoom del mapa
-         Output("click-layer", "children")],  # Actualiza la capa con el marcador
-        [Input("estacion-dropdown", "value")]
+        [Output("map", "center"),  
+        Output("map", "zoom"),    
+        Output("click-layer", "children")],  
+        [Input("estacion-dropdown", "value")],  # Input del dropdown
+        [State("map", "center"), State("map", "zoom")]  # Estado actual del mapa
     )
-    def actualizar_mapa(nombre_estacion):
-        print(f"Nombre de estación recibido del dropdown: {nombre_estacion}")
+    def actualizar_mapa(nombre_estacion, current_center, current_zoom):
+        print(f"Callback ejecutado. Estación seleccionada: {nombre_estacion}")
+
+        if not nombre_estacion:
+            print("No se ha seleccionado ninguna estación.")
+            raise PreventUpdate
+
         estaciones_filtradas = data[data['nombre'] == nombre_estacion]
         print(f"Número de estaciones encontradas: {len(estaciones_filtradas)}")
 
         if estaciones_filtradas.empty:
             print("No se encontraron estaciones con ese nombre.")
-            raise PreventUpdate  # Evita actualizar el mapa si no hay estación
+            raise PreventUpdate  
 
         estacion_seleccionada = estaciones_filtradas.iloc[0]
-        nueva_lat = estacion_seleccionada["latitud"]
-        nueva_lon = estacion_seleccionada["longitud"]
+        nueva_lat = float(estacion_seleccionada["latitud"])
+        nueva_lon = float(estacion_seleccionada["longitud"])
 
-        # Crear un marcador en la posición de la estación seleccionada
+        print(f"Coordenadas de la estación seleccionada: lat={nueva_lat}, lon={nueva_lon}")
+
+        # Restablecer el zoom solo si está fuera de un rango aceptable
+        zoom_minimo = 2
+        zoom_maximo = 25
+        nuevo_zoom = current_zoom if zoom_minimo <= current_zoom <= zoom_maximo else 12
+        
         marcador = dl.Marker(
             position=[nueva_lat, nueva_lon],
-            children=[
-                dl.Tooltip(f"Nombre: {estacion_seleccionada['nombre']}, Altitud: {estacion_seleccionada['altitudDEM']} m")
-            ]
+            children=[dl.Tooltip(f"Nombre: {estacion_seleccionada['nombre']}, Altitud: {estacion_seleccionada['altitudDEM']} m")]
         )
 
-        return [ [nueva_lat, nueva_lon], 25, [marcador] ]  # Centro, zoom y marcador
+        return [[nueva_lat, nueva_lon], nuevo_zoom, [marcador]]  # Se actualiza centro, zoom y marcador
+# Zoom corregido  # Centro, zoom y marcador
     
 
     # @app.callback(
@@ -325,15 +344,6 @@ def register_callbacks(app,data):
                         return (None, html.Div(message_sdpn,
                                             style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
                                 None, None, message_sdpn)
-
-                # # Validar fechas según la periodicidad seleccionada
-                # if (('anual' in selected_variable.lower() and not ano) or
-                #     ('mensual' in selected_variable.lower() and not (meses and ano)) or
-                #     ('diaria' in selected_variable.lower() and not (dias and meses and ano))):
-                #     message_sf = "Por favor, seleccione las fechas correspondientes para obtener su certificación."
-                #     return (None, html.Div(message_sf,
-                #                            style={'font-family': 'Arial', 'font-style': 'italic', 'color': 'darkred', 'font-size': 16}),
-                #             None, None, message_sf)
 
                 descrip_solicit = construir_descripsolicit(selected_variable)
                 # Llamar las funciones de RequestGP.py
@@ -454,8 +464,8 @@ def register_callbacks(app,data):
                                  html.Pre(error_traceback,
                                           style={'font-family': 'Consolas', 'font-style': 'italic', 'color': 'grey', 'font-size': 10})]),
                         None, None, message_et)
-        message_click = html.Div("Haga click en el botón de 'Analizar...' para generar la certificación:", 
-                               style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 16})
+        message_click = html.Div("Haga click en el botón de 'Analizar estaciones representativas' para generar la certificación:", 
+                               style={'font-family': 'Arial', 'font-style': 'italic', 'font-weight': 'bold', 'font-size': 15})
         return (None, message_click,
                 None, None, message_click)
     
@@ -475,7 +485,7 @@ def register_callbacks(app,data):
         print(f'n_clicks: {n_clicks}, message: {message_only}')
         
         # Se enuncian los posibles mensajes y su tipo
-        valid_message = "Haga click en el botón de 'Analizar...' para generar la certificación:"
+        valid_message = "Haga click en el botón de 'Analizar estaciones representativas' para generar la certificación:"
         invalid_messeges = [
             "Por favor, diligencie completamente el formulario para obtener su certificación.",
             "No se pudo procesar la solicitud,Job failed."

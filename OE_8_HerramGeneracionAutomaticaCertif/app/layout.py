@@ -95,12 +95,12 @@ def create_layout(app, data):
                     # Ajusta los márgenes según necesites
                     style={'margin-left': '5%', 'margin-right': '5%'},
                     children=[
-                        html.H1("Certificaciones del estado del tiempo y clima", 
+                        html.H1("Certificaciones del estado del tiempo y clima - IDEAM", 
                                 style={'font-family': 'arial', 'text-align': 'center'}, #, 'font-weight': 'bold'
                                 title="Datos obtenidos de la red de observación en superficie IDEAM "),
                         # Espaciador
                         html.Div(style={'height': '10px', 'width': '100%'}),
-                        html.P("Instrucciones:", style={'font-family': 'arial', 'text-align': 'justify','font-size': 13,
+                        html.P("Instrucciones:", style={'font-family': 'arial', 'text-align': 'justify','font-size': 15,
                                                         'font-weight': 'bold', 'margin-bottom': '5px'}),
                         html.P("Respetado usuario, en esta aplicación podrá obtener certificaciones del estado del tiempo;\
                                 para ello se solicitarán sus datos personales, de contacto, variable meteorológica, periodo,\
@@ -108,14 +108,14 @@ def create_layout(app, data):
                                 .dbf, .prj, .sbn, .sbx, .shp, .shx) y comprimido en .zip para ubicar el punto de interés o\
                                 hacer click en el mapa más adelante.",
                                 style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px',
-                                    'font-size': 13}),
+                                    'font-size': 15}),
                         html.P(["En esta aplicación, se generará una certificación por variable y periodo, si requiere más, recargue la página luego de terminar el proceso.\
                                 El diligenciamiento de todos los campos ES OBLIGATORIO para obtener el documento. Tenga\
                             en cuenta la ",
                             dcc.Link("política de tratamiento y protección de datos personales.",
                                         href="https://www.ideam.gov.co/sites/default/files/archivos/politica_de_tratamiento_y_proteccion_de_datos_personales_0.pdf",
                                         target="_blank")],
-                            style={'text-align': 'justify', 'margin-bottom': '20px', 'font-weight': 'bold', 'font-size': 13}), #'font-family': 'arial', 
+                            style={'text-align': 'justify', 'margin-bottom': '20px', 'font-weight': 'bold', 'font-size': 15}), #'font-family': 'arial', 
                         html.Div([
                             html.P("Datos personales:", style={'font-family': 'arial', 'text-align': 'center',
                                                             'font-weight': 'bold', 'font-size': 13}),
@@ -281,8 +281,7 @@ def create_layout(app, data):
                         html.Div(style={'height': '20px', 'width': '100%'}),
 
                         html.Div([
-                                html.P("Por favor, seleccione la fecha inicial y la fecha final de interés para su certificación.\
-                                    Si necesita desplazarse entre años, utilice el Slider.",
+                                html.P("Por favor, seleccione la fecha inicial y la fecha final de interés para su certificación.",
                                     style={'font-family': 'arial', 'text-align': 'justify'}),#, 'margin-bottom': '20px'}),
                             ], style={'height': '20px', 'width': '100%'}),
 
@@ -320,15 +319,7 @@ def create_layout(app, data):
                             html.Div([
                                 html.Label("Fecha final:", style={'font-family': 'arial', 'text-align': 'center',
                                                                 'font-weight': 'bold', 'font-size': 13}),
-                                # dcc.Slider(
-                                #     id='finyear-slider',
-                                #     min=1955,
-                                #     max=datetime.now().year,
-                                #     step=1,
-                                #     value=datetime.now().year,
-                                #     marks={year: str(year) for year in range(1955, datetime.now().year + 1, 10)},
-                                #     tooltip={"placement": "bottom", "always_visible": True}
-                                # ),
+
                                 dmc.DatePickerInput(
                                     id="findate-pckr",
                                     description="Escoja la fecha final de su periodo de interés",
@@ -366,6 +357,7 @@ def create_layout(app, data):
                             style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px'}),
 
                         html.Div([
+                            html.Div(id='upload-status'),
                             dcc.Upload(
                                 id='upload-data',
                                 children=html.Div([
@@ -384,29 +376,31 @@ def create_layout(app, data):
                                 },
                                 accept='.zip'
                             ),
-                            html.Div(id='upload-status'),
                             dcc.Store(id='file-storage', storage_type='session'), 
                         ]),
 
                         # Espaciador
                         html.Div(style={'height': '20px', 'width': '100%'}),
-
-                        html.P("Las coordenadas que seleccionó de su punto de interés son:",
-                            style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '5px'}),
+                        
+                        html.P("Coordenadas de su punto de interés:",
+                            style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '2px'}),
+                        html.Div(id="click-info"),  # Div para mostrar la información del clic
 
                         # Espaciador
                         html.Div(style={'height': '20px', 'width': '100%'}),
-                        
+
+                        html.P("Puede guiarse de las estaciones meteorológicas cercanas con este listado y luego hacer click:",
+                            style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '2px'}),
+
                         dcc.Dropdown(
                             id='estacion-dropdown',
-                            options=[{'label': nombre, 'value': nombre} for nombre in data['nombre']],
+                            options=[{'label': nombre, 'value': nombre} for nombre in sorted(data['nombre'])],
                             style={'font-family': 'arial'},
-                            value=data['nombre'][0]  # Valor por defecto
+                            value=sorted(data['nombre'])[0]  # Valor por defecto
                         ),
                         
                         html.Div([
-                            html.Div(id="click-info"),  # Div para mostrar la información del clic
-                            dl.Map(center=[4, -74], zoom=10, 
+                            dl.Map(center=[4, -74], zoom=7, 
                                 children=[
                                     dl.TileLayer(),  # Capa base
                                     #dl.LayerGroup(markers),
@@ -417,7 +411,7 @@ def create_layout(app, data):
                                                             ]) for i, row in data.iterrows()]),
                                     dl.LayerGroup(id="click-layer")  # Capa para los clics
                                 ], 
-                                style={'width': '100%', 'height': '70vh'}, id="map"),
+                                style={'width': '100%', 'height': '90vh'}, id="map"),
                         ]),
 
                         # Espaciador
@@ -428,10 +422,9 @@ def create_layout(app, data):
                                 representativa, el sistema generará su certificación.",
                             style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '10px'}),
 
-                        html.P("Oprima el botón 'Descargar certificación' solo cuando el mensaje de encima de los botones\
-                            haya cambiado a uno de color verde o naranja.",
+                        html.P("Una vez termine de generarse su documento, se habilitará el botón 'Descargar certificación'.",
                             style={'font-family': 'arial', 'text-align': 'justify', 'margin-bottom': '20px', 'font-weight': 'bold',
-                                'font-size': 13}),
+                                'font-size': 16}),
 
                         dcc.Store(id='gp-result-store'),
                         html.Div(id="output-represanalis"),
