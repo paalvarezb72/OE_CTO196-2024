@@ -104,20 +104,35 @@ def construir_descripsolicit(var_periodo):
     descripcion = "Solicitud series temporales de " + var_periodo
     return descripcion
 
-def fetch_station_data(cur, inicio, fin, sensor, codestacion):
-    query = f'''
-    select lm.station, s.name, lm.sensor, lm.event_time + interval '5' hour event_time, lm.event_value 
-    from cassandra.raw.weather_events AS lm INNER JOIN cassandra.raw.stations AS s
-        ON lm.station = s.stationid
-    where lm.station in ('{codestacion}')
-    AND lm.event_time BETWEEN timestamp '{inicio}' AND timestamp '{fin}' 
-    AND lm.sensor in ('{sensor}')
+# def fetch_station_data(cur, inicio, fin, sensor, codestacion):
+#     query = f'''
+#     select lm.station, s.name, lm.sensor, lm.event_time + interval '5' hour event_time, lm.event_value 
+#     from cassandra.raw.weather_events AS lm INNER JOIN cassandra.raw.stations AS s
+#         ON lm.station = s.stationid
+#     where lm.station in ('{codestacion}')
+#     AND lm.event_time BETWEEN timestamp '{inicio}' AND timestamp '{fin}' 
+#     AND lm.sensor in ('{sensor}')
+#     '''
+#     cur.execute(query)
+#     sttndata = cur.fetchall()
+
+#     # Se genera un Data Frame a partir de los datos extraídos
+#     stationdf = pd.DataFrame(sttndata, columns=['Station', 'Name', 'Sensor', 'Fecha', 'Valor'])
+
+#     return stationdf[['Fecha', 'Valor']]
+
+def fetch_station_data(cur,inicio, fin, sensor, codestacion):
+    query = f'''SELECT location_identifier_full, label, time_stamp, numeric_value 
+    FROM cassandra.aqts.timeseries_corrected_data
+    WHERE label in ('{sensor}')
+    AND time_stamp BETWEEN timestamp '{inicio}' AND timestamp '{fin}'
+    AND location_identifier_full in ('{codestacion}')
     '''
     cur.execute(query)
     sttndata = cur.fetchall()
 
     # Se genera un Data Frame a partir de los datos extraídos
-    stationdf = pd.DataFrame(sttndata, columns=['Station', 'Name', 'Sensor', 'Fecha', 'Valor'])
+    stationdf = pd.DataFrame(sttndata, columns=['Station', 'Sensor', 'Fecha', 'Valor'])
 
     return stationdf[['Fecha', 'Valor']]
 
@@ -149,8 +164,8 @@ def aplicar_transformacion(df, sel_var):
 
     return stationdf_fnl
 
-def modifdato_LimSup(df, data, selected_variable, codestacion):
-    # Volver numérico 'codestacion
+def modifdato_LimSup(df, data, selected_var, selected_variable, codestacion):
+    # Volver numérico 'codestacion'
     codestacion_n = re.sub("[^0-9]", "", codestacion)
     try:
         codestacion_n = int(codestacion_n)
@@ -158,33 +173,58 @@ def modifdato_LimSup(df, data, selected_variable, codestacion):
         print("codestacion contiene caracteres no convertibles a int.")
         return df
 
-    # Adaptacion límites según variable    
-    if selected_variable == "Precipitación total diaria":
-        # Obtener el límite superior para la estación seleccionada
-        limite_superior = data.loc[data['CODIGO'] == codestacion_n, 'LimSup']
-        if not limite_superior.empty:
-            limite_superior = limite_superior.values[0]
-        else:
-            # Manejo del caso en que no se encuentre un limite_superior
+    # Verificar si la columna 'Valor' existe
+    if 'Valor' not in df.columns:
+        raise KeyError("La columna 'Valor' no existe en el DataFrame.")
+
+    # Definir límites en función de la variable seleccionada
+    limites = {
+        "Precipitación": ("Precipitación total diaria", "LimSupThsn"),
+        "Temperatura máxima": ("Temperatura máxima", ["LimInfTemp", "LimSupTemp"]),
+        "Temperatura mínima": ("Temperatura mínima", ["LimInfTemp", "LimSupTemp"]),
+        "Temperatura del aire": ("Temperatura del aire", ["LimInfTemp", "LimSupTemp"]),
+        "Velocidad del viento": (None, 80.0)
+    }
+
+    # Verificar si la variable está en los límites definidos
+    if selected_var not in limites:
+        print(f"Variable {selected_var} no tiene un límite definido.")
+        return df
+
+    variable, limite_columna = limites[selected_var]
+
+    # Si la variable es precipitación, se busca un solo límite superior
+    if selected_var == "Precipitación" and selected_variable == "Precipitación total diaria":
+        limite_sup = data.loc[data['CODIGO'] == codestacion_n, limite_columna]
+        limite_sup = limite_sup.values[0] if not limite_sup.empty else None
+
+        if limite_sup is None:
             print(f"No se encontró un límite superior para el código de estación {codestacion}.")
             df['Valor'] = 'ND'
             return df
         
-        # Verificar si la columna 'Valor' existe
-        if 'Valor' not in df.columns:
-            raise KeyError("La columna 'Valor' no existe en el DataFrame.")
+        df.loc[df['Valor'] > limite_sup, 'Valor'] = 'ND'
 
-        # Evaluar cada fila para determinar si el valor excede el límite superior
-        def evaluar_fila(row):
-            if row['Valor'] > limite_superior:
-                return np.nan  # Asignar NaN para valores que exceden el límite superior
-            else:
-                return row['Valor']
+    # Para variables de temperatura con límite inferior y superior
+    elif selected_var in ["Temperatura máxima", "Temperatura mínima", "Temperatura del aire"]:
+        limite_inf = data.loc[data['CODIGO'] == codestacion_n, 'LimInfTemp']
+        limite_sup = data.loc[data['CODIGO'] == codestacion_n, 'LimSupTemp']
 
-        # Aplicar la función evaluar_fila
-        df['Valor'] = df.apply(evaluar_fila, axis=1)
+        limite_inf = limite_inf.values[0] if not limite_inf.empty else None
+        limite_sup = limite_sup.values[0] if not limite_sup.empty else None
+
+        if limite_inf is None or limite_sup is None:
+            print(f"No se encontraron límites para la variable {selected_var} en la estación {codestacion}.")
+            return df
+
+        df.loc[(df['Valor'] < limite_inf) | (df['Valor'] > limite_sup), 'Valor'] = np.nan
+
+    # Para velocidad del viento con límite fijo
+    elif selected_var == "Velocidad del viento":
+        df.loc[df['Valor'] > limite_columna, 'Valor'] = np.nan
 
     return df
+
 
 # def modifdfprecip_ClasifLimSup(df, data, selected_variable, codestacion):
 #     # Definir los bins y las etiquetas para la clasificación

@@ -3,16 +3,41 @@ import pandas as pd
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
+import yaml
+import os
 from dash import html, dcc, _dash_renderer
 from datetime import date, datetime
 from babel.dates import format_datetime
 from arcgis.gis import GIS
 from arcgis.mapping import WebMap
 from arcgis.features import FeatureLayer
+from utils.request_gp.utils import descifrar_datos
 
 _dash_renderer._set_react_version("18.2.0")
 
-gis = GIS("https://visualizador.ideam.gov.co/portal", "GDRM_IDEAM", "Meteo2024.")
+## Se configuran usuarios y contraseñas de portal de ArcGIS
+# 1. Cargar configuración desde config.yml
+base_dir = os.path.dirname(os.path.abspath(__file__))  # Obtiene el directorio de layout.py
+config_path = os.path.join(base_dir, "../utils/request_gp/config.yaml")
+
+with open(config_path, "r") as file:
+    config = yaml.safe_load(file)
+
+# 2. Obtener datos cifrados desde el archivo
+url = config["portal"]["url"]
+usuario_cifrado = config["portal"]["usuario"]
+password_cifrado = config["portal"]["password"]
+fernet_key = config["portal"]["fernet_key"]
+
+# 3. Descifrar usuario y contraseña
+usuario, password = descifrar_datos(usuario_cifrado, password_cifrado, fernet_key)
+
+# 4. Instanciar GIS con los datos descifrados
+if usuario and password:
+    gis = GIS(url, usuario, password)
+    print("Conexión establecida correctamente.")
+else:
+    print("Error: No se pudo descifrar el usuario o la contraseña.")
 
 # Configurar la fecha en español
 #fecha_actual = datetime.now().date()

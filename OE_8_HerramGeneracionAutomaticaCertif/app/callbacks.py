@@ -384,7 +384,7 @@ def register_callbacks(app,data):
                         stationdf['Valor'] = (stationdf['Valor'] * 3.6).round(1)
 
                     stationdf_fnl = aplicar_transformacion(stationdf, selected_variable)
-                    modifdato_LimSup(stationdf_fnl, data, selected_variable, codestacion)
+                    modifdato_LimSup(stationdf_fnl, data, selected_var, selected_variable, codestacion)
 
                     if selected_variable == "Precipitación total mensual":
                         stationdf_fnl = calculate_indices(stationdf_fnl, normales, codestacion)
