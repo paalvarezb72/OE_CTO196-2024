@@ -85,7 +85,7 @@ def register_callbacks(app,data):
 
         # Si es persona jurídica, deshabilitar todos menos los de grupo de interés
         if tpersona and 'Persona jurídica' in tpersona:
-            return [True, True, True, True, True, True, True, True, False, False]
+            return [True, True, True, True, True, True, True, True, False, True]
 
         # Evaluar el dropdown de género
         genero_input_disabled = True if gender != 'Otro' else False
@@ -264,7 +264,7 @@ def register_callbacks(app,data):
         nueva_lat = float(estacion_seleccionada["latitud"])
         nueva_lon = float(estacion_seleccionada["longitud"])
 
-        print(f"Coordenadas de la estación seleccionada: lat={nueva_lat}, lon={nueva_lon}")
+        #print(f"Coordenadas de la estación seleccionada: lat={nueva_lat}, lon={nueva_lon}") #for checking
 
         # Restablecer el zoom solo si está fuera de un rango aceptable
         zoom_minimo = 2

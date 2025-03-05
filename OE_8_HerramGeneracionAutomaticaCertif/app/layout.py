@@ -139,7 +139,7 @@ def create_layout(app, data):
                             html.Div([
                                 html.Label("Número de documento:", style={
                                     'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13, 'width': '100%'}),
-                                dcc.Input(id="ndoc-input", type="number", placeholder='1234567890', maxLength=10,
+                                dcc.Input(id="ndoc-input", type="number", placeholder='Digite su n.° de documento', maxLength=10,
                                         style={'width': '100%'}),
                             ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
                             html.Div([
@@ -223,14 +223,14 @@ def create_layout(app, data):
                             html.Div([
                                 html.Label("Correo:", style={
                                         'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
-                                dcc.Input(id="correo-input", type="email", placeholder='ejemplo@dominio.com',
+                                dcc.Input(id="correo-input", type="email", placeholder='Digite su correo electrónico',
                                         style={'width': '100%'}),
                             ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
 
                             html.Div([
                                 html.Label("Teléfono de contacto:", style={
                                         'font-family': 'arial', 'color': '#5D5D5D', 'font-size': 13}),
-                                dcc.Input(id="tel-input", type="number", placeholder='3124567890',style={'width': '100%'}),
+                                dcc.Input(id="tel-input", type="number", placeholder='Digite su número de contacto',style={'width': '100%'}),
                             ], style={'flex': 1, 'padding': '0 10px', 'min-width': '70px'}),
                             # Div sección columna 3 datos contacto
                             html.Div([
@@ -292,23 +292,14 @@ def create_layout(app, data):
                             html.Div([
                                 html.Label("Fecha inicial:", style={'font-family': 'arial', 'text-align': 'center',
                                                                 'font-weight': 'bold', 'font-size': 13}),
-                                # Año actual
-                                # dcc.Slider(
-                                #     id='inyear-slider',
-                                #     min=1955,
-                                #     max=datetime.now().year,
-                                #     step=1,
-                                #     value=1955,
-                                #     marks={year: str(year) for year in range(1955, datetime.now().year + 1, 10)},
-                                #     tooltip={"placement": "bottom", "always_visible": True}
-                                # ),
                                 dmc.DatePickerInput(
                                     id="inidate-pckr",
                                     description="Escoja la fecha inicial de su periodo de interés",
                                     minDate=date(1940, 1, 1),
                                     maxDate=datetime.now().date(),
                                     clearable=True,
-                                    value=date(2020, 12, 31),
+                                    placeholder='DD/MM/YYYY',
+                                    #value=date(2020, 12, 31),
                                     valueFormat="DD/MM/YYYY",  # or string in the format "YYYY-MM-DD"
                                     w=250,
                                 ),
@@ -325,7 +316,8 @@ def create_layout(app, data):
                                     description="Escoja la fecha final de su periodo de interés",
                                     minDate=date(1940, 8, 5),
                                     maxDate=datetime.now().date(),
-                                    value=datetime.now().date(),
+                                    placeholder='DD/MM/YYYY',
+                                    #value=datetime.now().date(),
                                     clearable=True,
                                     valueFormat="DD/MM/YYYY",  # or string in the format "YYYY-MM-DD"
                                     w=250,

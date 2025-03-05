@@ -217,11 +217,11 @@ def modifdato_LimSup(df, data, selected_var, selected_variable, codestacion):
             print(f"No se encontraron límites para la variable {selected_var} en la estación {codestacion}.")
             return df
 
-        df.loc[(df['Valor'] < limite_inf) | (df['Valor'] > limite_sup), 'Valor'] = np.nan
+        df.loc[(df['Valor'] < limite_inf) | (df['Valor'] > limite_sup), 'Valor'] = 'ND'
 
     # Para velocidad del viento con límite fijo
     elif selected_var == "Velocidad del viento":
-        df.loc[df['Valor'] > limite_columna, 'Valor'] = np.nan
+        df.loc[df['Valor'] > limite_columna, 'Valor'] = 'ND'
 
     return df
 

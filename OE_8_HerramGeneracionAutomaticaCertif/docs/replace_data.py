@@ -66,23 +66,29 @@ def reemplazar_datos_nan(tpers, doc, nombres, apellidos, correo, finicio, ffin, 
             if fecha_inicio.month == fecha_fin.month:
                 meses = fecha_inicio.strftime('%B')
             else:
-                meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')} de"
+                meses = f"{fecha_inicio.strftime('%B')} a {fecha_fin.strftime('%B')} de"
             anos = str(fecha_inicio.year)
         else:
             meses = f"{fecha_inicio.strftime('%B')} de {fecha_inicio.year} a {fecha_fin.strftime('%B')} de {fecha_fin.year}"
             anos = ""
 
-    elif 'diaria' in selected_variable.lower():
+    elif 'diaria' or 'horaria' in selected_variable.lower():
         # Se consideran días, meses y años
         if fecha_inicio.year == fecha_fin.year and fecha_inicio.month == fecha_fin.month:
-            dias = f"{fecha_inicio.day} al {fecha_fin.day}"
-            meses = fecha_inicio.strftime('%B')
+            # Mismo año y mismo mes
+            dias = f"{fecha_inicio.day} al {fecha_fin.day} de"
+            meses = f"{fecha_inicio.strftime('%B')} de"
             anos = str(fecha_inicio.year)
         elif fecha_inicio.year == fecha_fin.year:
-            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} al {fecha_fin.day} de {fecha_fin.strftime('%B')}"
+            # Mismo año pero diferente mes
+            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de"
+            meses = ""  # No necesitamos repetir el mes aquí
             anos = str(fecha_inicio.year)
         else:
+            # Diferente año
             dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+            meses = ""  # No necesitamos repetir el mes aquí
+            anos = ""  # No necesitamos repetir el año aquí
     
     if tpers == 'Persona natural':
         apellidosm = apellidos.upper()
@@ -132,23 +138,29 @@ def reemplazar_datos_precipd(tpers, doc, nombres, apellidos, finicio, ffin, sele
             if fecha_inicio.month == fecha_fin.month:
                 meses = fecha_inicio.strftime('%B')
             else:
-                meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')} de"
+                meses = f"{fecha_inicio.strftime('%B')} a {fecha_fin.strftime('%B')} de"
             anos = str(fecha_inicio.year)
         else:
             meses = f"{fecha_inicio.strftime('%B')} de {fecha_inicio.year} a {fecha_fin.strftime('%B')} de {fecha_fin.year}"
             anos = ""
 
-    elif 'diaria' in selected_variable.lower():
+    elif 'diaria' or 'horaria' in selected_variable.lower():
         # Se consideran días, meses y años
         if fecha_inicio.year == fecha_fin.year and fecha_inicio.month == fecha_fin.month:
-            dias = f"{fecha_inicio.day} al {fecha_fin.day}"
-            meses = fecha_inicio.strftime('%B')
+            # Mismo año y mismo mes
+            dias = f"{fecha_inicio.day} al {fecha_fin.day} de"
+            meses = f"{fecha_inicio.strftime('%B')} de"
             anos = str(fecha_inicio.year)
         elif fecha_inicio.year == fecha_fin.year:
-            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} al {fecha_fin.day} de {fecha_fin.strftime('%B')}"
+            # Mismo año pero diferente mes
+            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de"
+            meses = ""  # No necesitamos repetir el mes aquí
             anos = str(fecha_inicio.year)
         else:
+            # Diferente año
             dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+            meses = ""  # No necesitamos repetir el mes aquí
+            anos = ""  # No necesitamos repetir el año aquí
     
     if tpers == 'Persona natural':
         apellidosm = apellidos.upper()
@@ -181,6 +193,84 @@ def reemplazar_datos_precipd(tpers, doc, nombres, apellidos, finicio, ffin, sele
 
     return doc
 
+# def reemplazar_datos_precipd(tpers, doc, nombres, apellidos, finicio, ffin, selected_variable, estacion_seleccionada, dia, mes_nm, ano_p, primer_valor):
+#     if not finicio or not ffin:
+#         return "Selecciona ambas fechas."
+    
+#     # Convertir las fechas en objetos datetime
+#     fecha_inicio = datetime.fromisoformat(finicio)
+#     fecha_fin = datetime.fromisoformat(ffin)
+
+#     # Inicialización de textos
+#     dias = ""
+#     meses = ""
+#     anos = ""
+
+#     # Verificar la variable seleccionada: Anual, Mensual o Diaria
+#     if 'anual' in selected_variable.lower():
+#         # Solo interesa el año o años
+#         if fecha_inicio.year == fecha_fin.year:
+#             anos = str(fecha_inicio.year)
+#         else:
+#             anos = f"{fecha_inicio.year} a {fecha_fin.year}"
+
+#     elif 'mensual' in selected_variable.lower():
+#         # Se consideran meses y años
+#         if fecha_inicio.year == fecha_fin.year:
+#             if fecha_inicio.month == fecha_fin.month:
+#                 meses = fecha_inicio.strftime('%B')
+#             else:
+#                 meses = f"{fecha_inicio.strftime('%B')} a {fecha_fin.strftime('%B')} de"
+#             anos = str(fecha_inicio.year)
+#         else:
+#             meses = f"{fecha_inicio.strftime('%B')} de {fecha_inicio.year} a {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+#             anos = ""
+
+#     elif 'diaria' in selected_variable.lower():
+#         # Se consideran días, meses y años
+#         if fecha_inicio.year == fecha_fin.year and fecha_inicio.month == fecha_fin.month:
+#             dias = f"{fecha_inicio.day} al {fecha_fin.day}"
+#             meses = fecha_inicio.strftime('%B')
+#             anos = str(fecha_inicio.year)
+#         elif fecha_inicio.year == fecha_fin.year:
+#             dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} al {fecha_fin.day} de {fecha_fin.strftime('%B')}"
+#             anos = str(fecha_inicio.year)
+#         else:
+#             dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+    
+
+    
+#     if tpers == 'Persona natural':
+#         apellidosm = apellidos.upper()
+#     elif tpers == 'Persona jurídica':
+#         apellidosm = " "
+
+#     datos = {
+#         "{{NOMBRES}}": nombres.upper(),
+#         "{{APELLIDOS}}": apellidosm,
+#         "{{DIAS}}": dias,
+#         "{{MESES}}": meses,
+#         "{{AÑO}}": anos,
+#         "{{VARIABLE}}": selected_variable,
+#         "{{ESTACION}}": estacion_seleccionada['nombre'],
+#         "{{LATITUD}}": str(estacion_seleccionada['latitud']),
+#         "{{LONGITUD}}": str(estacion_seleccionada['longitud']),
+#         "{{ALTITUD}}": str(estacion_seleccionada['altitud']),
+#         "{{MUNICIPIO}}": str(estacion_seleccionada['MUNICIPIO']),
+#         "{{DEPARTAMENTO}}": str(estacion_seleccionada['DEPARTAMENTO']),
+#         "{{DIA}}": str(dia),
+#         "{{MES}}": str(mes_nm),
+#         "{{AÑO_P}}": str(ano_p),
+#         "{{PRIMER_DATO}}": str(primer_valor),
+#         "{{PRIMER_DATO_HA}}": str(primer_valor * 10),
+#     }
+
+#     for p in doc.paragraphs:
+#         for key, value in datos.items():
+#             reemplazar_datos_en_runs(p, key, value)
+
+#     return doc
+
 def reemplazar_datos(tpers, doc, nombres, apellidos, finicio, ffin, selected_variable, estacion_seleccionada):
     if not finicio or not ffin:
         return "Selecciona ambas fechas."
@@ -208,23 +298,29 @@ def reemplazar_datos(tpers, doc, nombres, apellidos, finicio, ffin, selected_var
             if fecha_inicio.month == fecha_fin.month:
                 meses = fecha_inicio.strftime('%B')
             else:
-                meses = f"{fecha_inicio.strftime('%B')} y {fecha_fin.strftime('%B')} de"
+                meses = f"{fecha_inicio.strftime('%B')} a {fecha_fin.strftime('%B')} de"
             anos = str(fecha_inicio.year)
         else:
             meses = f"{fecha_inicio.strftime('%B')} de {fecha_inicio.year} a {fecha_fin.strftime('%B')} de {fecha_fin.year}"
             anos = ""
 
-    elif 'diaria' in selected_variable.lower():
+    elif 'diaria' or 'horaria' in selected_variable.lower():
         # Se consideran días, meses y años
         if fecha_inicio.year == fecha_fin.year and fecha_inicio.month == fecha_fin.month:
-            dias = f"{fecha_inicio.day} al {fecha_fin.day}"
-            meses = fecha_inicio.strftime('%B')
+            # Mismo año y mismo mes
+            dias = f"{fecha_inicio.day} al {fecha_fin.day} de"
+            meses = f"{fecha_inicio.strftime('%B')} de"
             anos = str(fecha_inicio.year)
         elif fecha_inicio.year == fecha_fin.year:
-            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} al {fecha_fin.day} de {fecha_fin.strftime('%B')}"
+            # Mismo año pero diferente mes
+            dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de"
+            meses = ""  # No necesitamos repetir el mes aquí
             anos = str(fecha_inicio.year)
         else:
+            # Diferente año
             dias = f"{fecha_inicio.day} de {fecha_inicio.strftime('%B')} de {fecha_inicio.year} al {fecha_fin.day} de {fecha_fin.strftime('%B')} de {fecha_fin.year}"
+            meses = ""  # No necesitamos repetir el mes aquí
+            anos = ""  # No necesitamos repetir el año aquí
 
     if tpers == 'Persona natural':
         apellidosm = apellidos.upper()
